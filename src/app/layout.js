@@ -1,5 +1,3 @@
-"use client";
-
 import Nav from '@components/Nav';
 import '@styles/globals.css';
 import { RecoilRoot } from 'recoil';
