@@ -20,8 +20,15 @@ const Steps = (props) => {
         <div className="overflow-x-auto flex-center">
             <ul className="steps">
                 {
-                    props.responses.response.map((response) => (
-                        <li className={`step ${getStatusClass(response.status)}`} />
+                    props.responses.response.map((response, index) => (
+                        <li 
+                            key={index}
+                            className={`step ${
+                                getStatusClass(response.status)
+                            } ${
+                                (index == props.current) ? 'after:border' : ''
+                            }`}
+                        />
                     ))
                 }
             </ul>

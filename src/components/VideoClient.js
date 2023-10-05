@@ -9,7 +9,10 @@ const VideoClient = (props) => {
             width={"100%"}
             height={"100%"}
             url={props.url}
+            playing={props.play}
 
+            onPlay={() => props.setPlay(true)}
+            onPause={() => props.setPlay(false)}
             onProgress={(e) => props.setVideoProgress(e)}
         />
     )

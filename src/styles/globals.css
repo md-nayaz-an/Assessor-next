@@ -81,9 +81,9 @@
 }
 
 .head_text {
-  @apply m-1 lg:mx-16 lg:my-5 text-3xl font-extrabold leading-[1.15];
+  @apply m-1 lg:mx-10 lg:my-5 text-3xl font-extrabold leading-[1.15];
 }
 
 .desc {
-  @apply m-1 lg:mx-16 lg:my-2 text-lg sm:text-xl max-w-2xl;
+  @apply m-1 lg:mx-10 lg:my-2 text-lg sm:text-xl max-w-2xl;
 }

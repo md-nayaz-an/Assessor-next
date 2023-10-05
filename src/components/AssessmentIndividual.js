@@ -7,8 +7,12 @@ import VideoClient from './VideoClient';
 import Steps from './Steps';
 import { useRecoilState } from 'recoil';
 import { createResponseState } from '@recoil/atoms/responseAtom';
+import QuizComp from './QuizComp';
+import { useRouter } from 'next/navigation';
 
 const AssessmentIndividual = (props) => {
+
+	const router = useRouter();
 
 	const [videoDetails, setVideoDetails] = useState({
 		title: "",
@@ -25,14 +29,14 @@ const AssessmentIndividual = (props) => {
 		const res = await fetch('/api/videos/' + props.videoId);
 		const data = await res.json();
 		setVideoDetails(data);
-		console.log(data);
+		//console.log(data);
 	}
 	
 	const fetchQuestions = async () => {
 		const res = await fetch('/api/questions/' + props.videoId);
 		const data = await res.json();
 		setQuestions(data);
-		console.log(data);
+		//console.log(data);
 	}
 	
 	useEffect(() => {
@@ -56,25 +60,57 @@ const AssessmentIndividual = (props) => {
 			timestamp: Date.now(),
 		};
 
+		setCurrent(0);
 	  	setResponses(initialResponseState);
 	  	setStart(true);
+		setPlay(true);
 	}
 
 	useEffect(() => {
 	  console.log(responses);
-	
 	}, [responses])
 
+	const [current, setCurrent] = useState(-1);
 
 	const [videoProgress, setVideoProgress] = useState({});
+	const [play, setPlay] = useState(false);
+	const [show, setShow] = useState(false);
 
-	useEffect(() => {
-	  console.log(videoProgress);
+
+	const onNext = () => {
+		setCurrent(prevCurrent => prevCurrent + 1);
+		setPlay(true);
+		setShow(false);
+	}
+
+	const onSubmit = async () => {
+		console.log("submited");
+		
+		try {
+			const response = await fetch("/api/responses/new", {
+				method: "POST",
+				body: JSON.stringify(responses),
+			});
+
+			if(response.ok) {
+				router.push("/client/assessments");
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	}
 	
+	useEffect(() => {
+		if(videoProgress.playedSeconds >= questions[current]?.timestamp) {
+//			console.log({timestamp: questions[current]?.timestamp, played : videoProgress.playedSeconds});
+			setPlay(false);
+			setShow(true);
+		}
+
 	}, [videoProgress])
 	
 	return (
-		<section className='p-5 w-full max-w-full flex-center flex-col'>
+		<section className='py-5 w-full max-w-full flex-center flex-col'>
 			<div className=' flex-start flex-col self-start'>
 				<h1 className='head_text text-left'>
 					{videoDetails.title}
@@ -83,25 +119,61 @@ const AssessmentIndividual = (props) => {
 					{videoDetails.description}
 				</p>
 			</div>
-			<div className='mt-4 w-full max-w-full flex-start flex-col lg:flex-row overflow-visible'>
-				<div className='w-[90vw] aspect-video lg:w-1/2 self-center lg:self-start'>
-					<VideoClient
-						url={videoDetails.url}
-						setVideoProgress={setVideoProgress}
-					/>
+			<div className='mt-4 w-full max-w-full flex items-end flex-col lg:flex-row overflow-visible'>
+				<div className='w-full py-4 lg:w-1/2 flex-center flex-col gap-4'>
+					<div className='w-[90vw] aspect-video lg:w-full self-center lg:self-start  relative'>
+						<VideoClient
+							url={videoDetails.url}
+							setVideoProgress={setVideoProgress}
+							play={play}
+							setPlay={setPlay}
+						/>
+
+						<div 
+							className={`absolute bottom-0 p-4 w-full h-2/4 bg-neutral-focus opacity-96 rounded-t-xl overflow-auto text-lg text-accent-focus
+								${(show) ? '': 'invisible'} 
+								hover:h-3/4 
+								transition-all ease-in-out delay-150
+							`}
+						>
+							<span className='opacity-100'>
+								{questions[current]?.summary}
+							</span>
+						</div>
+					</div>
+					
+					{
+						(start) ?
+							<button className='btn btn-primary self-end' onClick={onSubmit}>End and Submit</button> :
+							<></>
+					}
 				</div>
 				
 				{
 					start ?
-					<div className='p-4 w-full lg:w-1/2 h-96'>
+					<div className='lg:p-4 w-full lg:w-1/2 flex-center flex-col gap-2'>
 						<Steps 
 							responses={responses}
+							current={current}
 						/>
+
+						<div className='w-full rounded-lg'>
+							{
+								(show) ?
+								<QuizComp
+									videoId={props.videoId}
+									question={questions[current]}
+									onNext={onNext}
+									show={show}
+								/> :
+								<></>
+							}
+						</div>
 					</div>:
 					<div className='p-4 w-full flex-center lg:w-1/2 self-center'>
 						<button className='btn btn-accent' onClick={onStartClick}>Start Assessment</button>
 					</div>
-					}
+				}
 			</div>
 		</section>
   	)
