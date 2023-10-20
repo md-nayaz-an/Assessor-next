@@ -16,24 +16,17 @@ export const deleteQuestionDataSelector = selector({
         // If the index is out of bounds or the question data is not available, you can return a default value, such as null.
         return null;
     },
-    set: ({ get, set }, { videoId, index }) => {
+    set: ({ get, set }, { videoId, localId }) => {
         // Get the current question state for the videoId
         const questionState = get(createQuestionState(videoId));
 
-        // Make sure the index is within bounds
-        if (index >= 0 && index < questionState.length) {
-            // Create a copy of the question data array
-            const updatedQuestionState = [...questionState];
+        // Use the filter method to create a new array with the item removed
+        const updatedQuestionState = questionState.filter(question => question.localId !== localId);
 
-            // Remove the item at the provided index
-            updatedQuestionState.splice(index, 1);
+        // Update the question state with the updated data
+        set(createQuestionState(videoId), updatedQuestionState);
 
-            // Update the question state with the updated data
-            set(createQuestionState(videoId), updatedQuestionState);
-
-            console.log(updatedQuestionState);
-            // Update local storage with the updated data
-            localStorage.setItem(`questionData_${videoId}`, JSON.stringify(updatedQuestionState));
-        }
+        // Update local storage with the updated data
+        localStorage.setItem(`questionData_${videoId}`, JSON.stringify(updatedQuestionState));
     },
 });

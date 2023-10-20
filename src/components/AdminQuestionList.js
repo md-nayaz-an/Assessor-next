@@ -1,5 +1,6 @@
 'use client';
 
+import { createQuestionState } from '@recoil/atoms/questionsAtom';
 import { appendQuestionDataSelector } from '@recoil/selectors/appendQuestionDataSelector';
 import { deleteQuestionDataSelector } from '@recoil/selectors/deleteQuestionDataSelector';
 import { updateQuestionDataSelector } from '@recoil/selectors/updateQuestionDataSelector';
@@ -9,29 +10,21 @@ import { useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 
 const AdminQuestionList = (props) => {
-
+    
     const [checked, setChecked] = useState(-1);
+    
 
     const setNewQuestion = useSetRecoilState(appendQuestionDataSelector);
     const updateQuestion = useSetRecoilState(updateQuestionDataSelector);
     const deleteQuestion = useSetRecoilState(deleteQuestionDataSelector);
 
-
-    const [localQuestions, setLocalQuestions] = useState(props.localQuestions);
-
-    useEffect(() => {
-        console.log(props.localQuestions);
-        setLocalQuestions(props.localQuestions);
-        console.log(localQuestions);
-    }, [props.localQuestions, localQuestions])
-    
-
     const AddNewMarker = () => {
         setNewQuestion({
             videoId: props.videoId,
             newData: {
+                localId: props.localQuestions.length,
                 timestamp: props.videoProgress.playedSeconds,
-                local: true,
+                videoid: props.videoId,
                 title: "New Title",
                 summary: "",
                 question:"",
@@ -47,16 +40,34 @@ const AdminQuestionList = (props) => {
                     className='w-full overflow-auto flex flex-col gap-2'
                 >
                     {
-                        localQuestions.map((question, index) => (
+                        props.localQuestions.map((question, index) => (
                             <ListComp
                                 question={question}
                                 index={index}
-                                key={index}
+                                key={question.localId}
                                 checked={checked}
                                 setChecked={setChecked}
                                 updateQuestion={updateQuestion}
                                 deleteQuestion={deleteQuestion}
                                 videoId={props.videoId}
+                            />
+                        ))
+                    }
+
+                    
+
+                    {
+                        props.cloudQuestions.map((question, index) => (
+                            <ListComp
+                                question={question}
+                                index={index}
+                                key={question._id}
+                                checked={checked}
+                                setChecked={setChecked}
+                                updateQuestion={updateQuestion}
+                                deleteQuestion={deleteQuestion}
+                                videoId={props.videoId}
+                                cloud={true}
                             />
                         ))
                     }
@@ -127,25 +138,29 @@ export const ListComp = (props) => {
     }
 
     const onDelete = () => {
-        console.log(props.index);
+        console.log(question.localId);
         props.deleteQuestion({
             videoId: props.videoId,
-            index: props.index
+            localId: question.localId
         })
     }
 
     return (
         <div 
-            className="collapse bg-base-200 min-h-16"
-            onClick={() => {
-                if(props.checked !== props.index)
-                    props.setChecked(props.index)
-                
-            }}
+            className="collapse collapse-arrow bg-base-200 min-h-16"
+            
         >
-            <input type="radio" name="my-accordion-2" checked={
-                (props.checked === props.index) ? "checked" : ""
-            }/>
+            <input 
+                type="radio" 
+                name="my-accordion-2" 
+                checked={(props.checked === props.index)}
+                onClick={() => {
+                        if(props.checked === props.index)
+                                props.setChecked(-1)
+                        else
+                            props.setChecked(props.index)
+                }}
+            />
 
             <div className="collapse-title text-xl font-medium flex justify-between items-center w-full">
                 <div className='flex items-center gap-4'>
@@ -153,18 +168,11 @@ export const ListComp = (props) => {
                         {timeStampParser(question.timestamp)}
                     </div>
                     {question.title}
+                    {
+                        !props.cloud &&
+                        <div className="badge badge-accent">Local</div>
+                    }
                 </div>
-
-                <button className='btn btn-circle self-end'
-                    onClick={() => {
-                        if(props.checked === props.index)
-                            props.setChecked(-1)
-                    }}
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path xmlns="http://www.w3.org/2000/svg" d="M18 15L12 9L6 15" strokeWidth="2" />
-                    </svg>
-                </button>
                 
             </div>
             <div className="collapse-content max-h-fit">     
@@ -181,6 +189,8 @@ export const ListComp = (props) => {
                             ...q,
                             title: e.target.value
                         }))}
+                        
+                        disabled={props.cloud}
                     />
                     
                     <label className="label mt-4">
@@ -195,6 +205,8 @@ export const ListComp = (props) => {
                             ...q,
                             summary: e.target.value
                         }))}
+                        
+                        disabled={props.cloud}
                     />
 
                     <label className="label">
@@ -209,6 +221,8 @@ export const ListComp = (props) => {
                             ...q,
                             question: e.target.value
                         }))}
+                        
+                        disabled={props.cloud}
                     />
 
                     {
@@ -218,42 +232,51 @@ export const ListComp = (props) => {
                                 option={option}
                                 setOptions={setOptions}
                                 key={index}
+                                cloud={props.cloud}
                             />
                         ))
                     }
-                    <button
-                        className='btn btn-sm'
-                        onClick={() => 
-                            setOptions(prevOptions => ([
-                                    ...prevOptions,
-                                    {
-                                        optionId: prevOptions.length,
-                                        option: "",
-                                        isCorrect: false
-                                    }
-                            ]))}
-                    >
+                    {
+                        !props.cloud &&
+
+                        <button
+                            className='btn btn-sm m-2'
+                            onClick={() => 
+                                setOptions(prevOptions => ([
+                                        ...prevOptions,
+                                        {
+                                            optionId: prevOptions.length,
+                                            option: "",
+                                            isCorrect: false
+                                        }
+                                ]))}
+                        >
                         Add option
                     </button>
 
+                    }
                 </div>
 
-                <div className='my-8 px-4 w-full flex-center gap-4'>
-                    <button 
-                        className="btn w-1/2"
-                        onClick={onDelete}
-                    >
-                        Delete
-                    </button>
-                    
-                    <button 
-                        className="btn btn-primary w-1/2" 
-                        type='submit'
-                        onClick={update}
-                    >
-                        Save
-                    </button>
-                </div>
+                {
+                    !props.cloud &&
+
+                    <div className='my-8 px-4 w-full flex-center gap-4'>
+                        <button 
+                            className="btn w-1/2"
+                            onClick={onDelete}
+                        >
+                            Delete
+                        </button>
+                        
+                        <button 
+                            className="btn btn-primary w-1/2" 
+                            type='submit'
+                            onClick={update}
+                        >
+                            Save
+                        </button>
+                    </div>
+                }
             </div>
         </div>
     )

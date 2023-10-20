@@ -4,10 +4,11 @@ import React from 'react'
 import { useState } from 'react';
 import { useEffect } from 'react';
 import VideoClient from './VideoClient';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { useRouter } from 'next/navigation';
 import AdminQuestionList from './AdminQuestionList';
 import { createQuestionState } from '@recoil/atoms/questionsAtom';
+import { deleteLocalQuestionDataSelector } from '@recoil/selectors/deleteLocalQuestionDataSelector';
 const AdminAssessmentIndividual = (props) => {
 
 	const router = useRouter();
@@ -18,26 +19,49 @@ const AdminAssessmentIndividual = (props) => {
 		url: "",
 		
 	});
+	const [cloudQuestions, setCloudQuestions] = useState([]);
 
-	const [localQuestions, setLocalQuestions] = useRecoilState(createQuestionState(props.videoId));
-	
+    const [localQuestions, setLocalQuestions] = useRecoilState(createQuestionState(props.videoId));
+	const deleteQuestions = useSetRecoilState(deleteLocalQuestionDataSelector);
+
 	const fetchVideoDetails = async () => {
 		const res = await fetch('/api/videos/' + props.videoId);
 		const data = await res.json();
 		setVideoDetails(data);
 		//console.log(data);
 	}
-	
-	
+	const fetchQuestions = async () => {
+		const res = await fetch('/api/questions/' + props.videoId);
+		const data = await res.json();
+		setCloudQuestions(data);
+		//console.log(data);
+	}
+
 	useEffect(() => {
 		if(props.videoId) {
 			fetchVideoDetails();
+			fetchQuestions();
 		}
 	}, [props])
 
 	const [videoProgress, setVideoProgress] = useState({});
 	const [play, setPlay] = useState(false);
 
+	const onSubmit = async () => {
+		const res = await fetch('/api/questions/new',{
+			method: "POST",
+			body: JSON.stringify(localQuestions)
+		});
+		if(res.ok) {
+			const data = await res.json();
+			console.log(data);
+			setCloudQuestions(data);
+			deleteQuestions(props.videoId);
+		}
+		else {
+			console.log(res.statusText);
+		}
+	}
 	
 	return (
 		<section className='py-5 w-full max-w-full flex-center flex-col'>
@@ -69,10 +93,16 @@ const AdminAssessmentIndividual = (props) => {
 						play={play}
 						setPlay={setPlay}
 						localQuestions={localQuestions}
+						cloudQuestions={cloudQuestions}
 					/>
-					
 				</div>
 			</div>
+			<button
+				className='btn btn-primary w-36'
+				onClick={onSubmit}
+			>
+				Submit
+			</button>
 		</section>
   	)
 }
