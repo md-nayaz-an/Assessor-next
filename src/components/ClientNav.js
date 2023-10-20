@@ -1,18 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
-const Nav = () => {
+const ClientNav = () => {
 
     const menu = [
         {
-            name: "Home", url: "/"
+            name: "Home", url: "/client"
         },
         {
-            name: "Admin", url: "/admin"
-        },
-        {
-            name: "Client", url: "/client"
+            name: "Assessments", url: "/client/assessments"
         },
     ]
     
@@ -74,4 +72,4 @@ const Nav = () => {
     )
 }
 
-export default Nav
+export default ClientNav

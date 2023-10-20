@@ -1,6 +1,6 @@
 "use client";
 
-import Nav from '@components/Nav';
+import Nav from '@components/ClientNav';
 import '@styles/globals.css';
 import { RecoilRoot } from 'recoil';
 
@@ -9,10 +9,7 @@ export default function RootLayout({ children }) {
 		<html lang="en">
 			<body>
 				<main className='app'>
-					<Nav />
-					<RecoilRoot>
-						{children}
-					</RecoilRoot>
+					{children}
 				</main>
 			</body>
 		</html>

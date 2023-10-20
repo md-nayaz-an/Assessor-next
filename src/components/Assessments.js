@@ -7,7 +7,9 @@ import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { useCallback } from 'react';
-const Assessments = () => {
+import NewAssessment from './NewAssessment';
+
+const Assessments = ({ admin }) => {
 
     const [videos, setVideos] = useState([]);
     
@@ -16,10 +18,10 @@ const Assessments = () => {
 
     const createQueryString = useCallback(
         (name, value) => {
-          const params = new URLSearchParams(searchParams)
-          params.set(name, value)
-     
-          return params.toString()
+            const params = new URLSearchParams(searchParams)
+            params.set(name, value)
+        
+            return params.toString()
         },
         [searchParams]
     )
@@ -29,6 +31,7 @@ const Assessments = () => {
         const res = await fetch('/api/videos');
         const data = await res.json();
         setVideos(data);
+        console.log(videos);
     }
     useEffect(() => {
         fetchVideos();
@@ -39,11 +42,20 @@ const Assessments = () => {
     }, [])
     
     const onClick = (videoId, videoUrlId) => {
-        router.push(`/client/assessments/${videoId}?` + createQueryString("videoUrlId", videoUrlId));
+        if(admin)
+            router.push(`/admin/assessments/${videoId}?` + createQueryString("videoUrlId", videoUrlId));
+        else
+            router.push(`/client/assessments/${videoId}?` + createQueryString("videoUrlId", videoUrlId));
     }
 
     return (
-        <section className="mt-16 mx-auto w-full flex justify-center items-center flex-col gap-2 overflow-auto">
+        <section className="mt-4 mx-auto w-full flex justify-center items-center flex-col gap-2 overflow-auto">
+            {
+                admin &&
+                <NewAssessment 
+                    setVideos={setVideos}
+                />
+            }
             <div className="flex flex-row flex-wrap p-2 gap-4">
                 {
                     videos.map((video) => (
@@ -64,6 +76,7 @@ const Assessments = () => {
                         </div>
                     ))
                 }
+
             </div>
         </section>
     )

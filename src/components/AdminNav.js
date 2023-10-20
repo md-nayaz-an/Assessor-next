@@ -2,17 +2,14 @@
 
 import Link from "next/link";
 
-const Nav = () => {
+const AdminNav = () => {
 
     const menu = [
         {
-            name: "Home", url: "/"
+            name: "Home", url: "/admin"
         },
         {
-            name: "Admin", url: "/admin"
-        },
-        {
-            name: "Client", url: "/client"
+            name: "Assessments", url: "/admin/assessments"
         },
     ]
     
@@ -74,4 +71,4 @@ const Nav = () => {
     )
 }
 
-export default Nav
+export default AdminNav

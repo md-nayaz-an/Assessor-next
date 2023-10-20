@@ -1,7 +1,10 @@
-import Image from 'next/image'
+import React from 'react'
+import ClientNav from '@components/Nav'
 
-export default function Home() {
-	return (
-		<></>		
-	)
+const Home = () => {
+    return (
+        <ClientNav />
+    )
 }
+
+export default Home
