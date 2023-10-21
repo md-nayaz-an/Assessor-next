@@ -26,14 +26,18 @@ const AssessmentIndividual = (props) => {
   	const [responses, setResponses] = useRecoilState(createResponseState(props.videoId));
 
 	const fetchVideoDetails = async () => {
-		const res = await fetch('/api/videos/' + props.videoId);
+		const res = await fetch('/api/videos/' + props.videoId, {
+            cache: 'no-store'
+        });
 		const data = await res.json();
 		setVideoDetails(data);
 		//console.log(data);
 	}
 	
 	const fetchQuestions = async () => {
-		const res = await fetch('/api/questions/' + props.videoId);
+		const res = await fetch('/api/questions/' + props.videoId, {
+            cache: 'no-store'
+        });
 		const data = await res.json();
 		setQuestions(data);
 		//console.log(data);

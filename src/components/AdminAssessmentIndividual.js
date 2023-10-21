@@ -25,13 +25,17 @@ const AdminAssessmentIndividual = (props) => {
 	const deleteQuestions = useSetRecoilState(deleteLocalQuestionDataSelector);
 
 	const fetchVideoDetails = async () => {
-		const res = await fetch('/api/videos/' + props.videoId);
+		const res = await fetch('/api/videos/' + props.videoId, {
+            cache: 'no-store'
+        });
 		const data = await res.json();
 		setVideoDetails(data);
 		//console.log(data);
 	}
 	const fetchQuestions = async () => {
-		const res = await fetch('/api/questions/' + props.videoId);
+		const res = await fetch('/api/questions/' + props.videoId, {
+            cache: 'no-store'
+        });
 		const data = await res.json();
 		setCloudQuestions(data);
 		//console.log(data);

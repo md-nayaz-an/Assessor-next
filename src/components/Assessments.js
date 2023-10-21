@@ -84,4 +84,5 @@ const Assessments = ({ admin }) => {
     )
 }
 
+export const fetchCache = 'force-no-store';
 export default Assessments

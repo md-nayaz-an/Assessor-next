@@ -43,7 +43,7 @@ const AdminQuestionList = (props) => {
                         props.localQuestions.map((question, index) => (
                             <ListComp
                                 question={question}
-                                index={index}
+                                index={question.localId}
                                 key={question.localId}
                                 checked={checked}
                                 setChecked={setChecked}
@@ -60,7 +60,7 @@ const AdminQuestionList = (props) => {
                         props.cloudQuestions.map((question, index) => (
                             <ListComp
                                 question={question}
-                                index={index}
+                                index={question._id}
                                 key={question._id}
                                 checked={checked}
                                 setChecked={setChecked}
@@ -105,10 +105,10 @@ const AdminQuestionList = (props) => {
                     {
                         (props.play) ?
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path xmlns="http://www.w3.org/2000/svg" d="M8 5V19M16 5V19" strokeWidth="2" strokeLinecap="round" strokeLineJoin="round"/>
+                            <path xmlns="http://www.w3.org/2000/svg" d="M8 5V19M16 5V19" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg> :
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path d="M16.6582 9.28638C18.098 10.1862 18.8178 10.6361 19.0647 11.2122C19.2803 11.7152 19.2803 12.2847 19.0647 12.7878C18.8178 13.3638 18.098 13.8137 16.6582 14.7136L9.896 18.94C8.29805 19.9387 7.49907 20.4381 6.83973 20.385C6.26501 20.3388 5.73818 20.0469 5.3944 19.584C5 19.053 5 18.1108 5 16.2264V7.77357C5 5.88919 5 4.94701 5.3944 4.41598C5.73818 3.9531 6.26501 3.66111 6.83973 3.6149C7.49907 3.5619 8.29805 4.06126 9.896 5.05998L16.6582 9.28638Z" strokeWidth="2" strokeLineJoin="round"/>
+                            <path d="M16.6582 9.28638C18.098 10.1862 18.8178 10.6361 19.0647 11.2122C19.2803 11.7152 19.2803 12.2847 19.0647 12.7878C18.8178 13.3638 18.098 13.8137 16.6582 14.7136L9.896 18.94C8.29805 19.9387 7.49907 20.4381 6.83973 20.385C6.26501 20.3388 5.73818 20.0469 5.3944 19.584C5 19.053 5 18.1108 5 16.2264V7.77357C5 5.88919 5 4.94701 5.3944 4.41598C5.73818 3.9531 6.26501 3.66111 6.83973 3.6149C7.49907 3.5619 8.29805 4.06126 9.896 5.05998L16.6582 9.28638Z" strokeWidth="2" strokeLinejoin="round"/>
                         </svg>
                     }
                 </button>
@@ -151,11 +151,11 @@ export const ListComp = (props) => {
     }
 
     const onDelete = () => {
-        console.log(question.localId);
-        props.deleteQuestion({
-            videoId: props.videoId,
-            localId: question.localId
-        })
+        if(props.videoId)
+            props.deleteQuestion({
+                videoId: props.videoId,
+                localId: question.localId
+            })
     }
 
     return (

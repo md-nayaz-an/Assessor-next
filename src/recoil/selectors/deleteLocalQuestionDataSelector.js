@@ -2,7 +2,7 @@ import { createQuestionState } from "@recoil/atoms/questionsAtom";
 import { selector } from "recoil";
 
 export const deleteLocalQuestionDataSelector = selector({
-    key: 'deleteQuestionDataSelector',
+    key: 'deleteLocalQuestionDataSelector',
     get: ({ get }) => {
         // This is a dummy get function. It doesn't have to do anything.
         // You can return a default value or manipulate some data here, but it's not needed for the delete operation.
