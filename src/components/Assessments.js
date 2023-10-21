@@ -28,7 +28,9 @@ const Assessments = ({ admin }) => {
 
 
     const fetchVideos = async () => {
-        const res = await fetch('/api/videos');
+        const res = await fetch('/api/videos', {
+            cache: 'no-store'
+        });
         const data = await res.json();
         setVideos(data);
         console.log(videos);
