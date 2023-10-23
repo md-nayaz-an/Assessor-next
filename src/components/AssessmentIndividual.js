@@ -115,7 +115,7 @@ const AssessmentIndividual = (props) => {
 			setPlay(false);
 			setShow(true);
 		}
-
+		
 	}, [videoProgress])
 	
 	return (
@@ -176,7 +176,20 @@ const AssessmentIndividual = (props) => {
 									onNext={onNext}
 									show={show}
 								/> :
-								<></>
+						        <div className='pb-48 w-full flex-center flex-col relative lg:pb-20 min-h-[6rem]'>
+									{
+										(current >= 0 && current < questions.length) &&
+										<div className="relative h-full">
+											<div className="absolute inset-0 w-20 h-20 flex-center -translate-x-1/2">
+												<span className="countdown">
+													<span style={{ "--value": Math.floor(questions[current].timestamp - videoProgress.playedSeconds) % 60 }}></span>
+												</span>
+											</div>
+											
+											<div className="loading loading-ring absolute inset-0 w-20 h-20 -translate-x-1/2"></div>
+										</div>
+									}
+								</div>
 							}
 						</div>
 					</div>:
