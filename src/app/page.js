@@ -1,9 +1,9 @@
 import React from 'react'
-import ClientNav from '@components/Nav'
+import Nav from '@components/Nav'
 
 const Home = () => {
     return (
-        <ClientNav />
+        <Nav />
     )
 }
 

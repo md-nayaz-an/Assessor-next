@@ -7,7 +7,7 @@ export const GET = async (request) => {
         await connectToDB();
 
         const videos = await Videos.find({});
-        console.log(videos)
+        
         return new Response(JSON.stringify(videos), {
             status: 200,
         })
