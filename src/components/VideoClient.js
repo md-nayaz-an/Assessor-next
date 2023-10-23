@@ -1,11 +1,11 @@
 import React from 'react'
-
-import dynamic from "next/dynamic";
-const ReactPlayer = dynamic(() => import("react-player/lazy"), { ssr: false });
+import ReactPlayer from 'react-player';
 
 const VideoClient = (props) => {
     return (
         <ReactPlayer
+            ref={props.playerRef}
+            
             width={"100%"}
             height={"100%"}
             url={props.url}

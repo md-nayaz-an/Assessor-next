@@ -3,16 +3,22 @@
 import React from 'react'
 import { useState } from 'react';
 import { useEffect } from 'react';
-import VideoClient from './VideoClient';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { useRouter } from 'next/navigation';
 import AdminQuestionList from './AdminQuestionList';
 import { createQuestionState } from '@recoil/atoms/questionsAtom';
 import { deleteLocalQuestionDataSelector } from '@recoil/selectors/deleteLocalQuestionDataSelector';
+import { useRef } from 'react';
+
+import dynamic from 'next/dynamic';
+const VideoClient = dynamic(() => import("./VideoClient"), { ssr: false });
+
 
 const AdminAssessmentIndividual = (props) => {
 
 	const router = useRouter();
+
+	const playerRef = useRef(null);
 
 	const [videoDetails, setVideoDetails] = useState({
 		title: "",
@@ -67,6 +73,18 @@ const AdminAssessmentIndividual = (props) => {
 			console.log(res.statusText);
 		}
 	}
+
+	const onSeekForward = () => {
+		if (playerRef.current) {
+			playerRef.current.seekTo(playerRef.current.getCurrentTime() + 10);
+		}
+	}
+
+	const onSeekBackward = () => {
+		if (playerRef.current) {
+			playerRef.current.seekTo(playerRef.current.getCurrentTime() - 10);
+		}
+	}
 	
 	return (
 		<section className='py-5 w-full max-w-full flex-center flex-col'>
@@ -82,6 +100,7 @@ const AdminAssessmentIndividual = (props) => {
 					</div>
 					<div className='w-[90vw] aspect-video lg:w-full self-center lg:self-start  relative'>
 						<VideoClient
+							playerRef={playerRef}
 							url={videoDetails.url}
 							setVideoProgress={setVideoProgress}
 							play={play}
@@ -99,6 +118,8 @@ const AdminAssessmentIndividual = (props) => {
 						setPlay={setPlay}
 						localQuestions={localQuestions}
 						cloudQuestions={cloudQuestions}
+						onSeekForward={onSeekForward}
+						onSeekBackward={onSeekBackward}
 					/>
 				</div>
 			</div>

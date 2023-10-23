@@ -3,17 +3,22 @@
 import React from 'react'
 import { useState } from 'react';
 import { useEffect } from 'react';
-import VideoClient from './VideoClient';
 import Steps from './Steps';
 import { useRecoilState } from 'recoil';
 import { createResponseState } from '@recoil/atoms/responseAtom';
 import QuizComp from './QuizComp';
 import { useRouter } from 'next/navigation';
+import { useRef } from 'react';
+
+import dynamic from 'next/dynamic';
+const VideoClient = dynamic(() => import("./VideoClient"), { ssr: false });
 
 const AssessmentIndividual = (props) => {
 
 	const router = useRouter();
 
+	const playerRef = useRef(null);
+	
 	const [videoDetails, setVideoDetails] = useState({
 		title: "",
 		description: "",
@@ -127,6 +132,7 @@ const AssessmentIndividual = (props) => {
 				<div className='w-full py-4 lg:w-1/2 flex-center flex-col gap-4'>
 					<div className='w-[90vw] aspect-video lg:w-full self-center lg:self-start  relative'>
 						<VideoClient
+							playerRef={playerRef}
 							url={videoDetails.url}
 							setVideoProgress={setVideoProgress}
 							play={play}
