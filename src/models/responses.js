@@ -5,6 +5,12 @@ const ResponseSchema = new Schema ({
         type: Schema.Types.ObjectId,
         ref: 'Videos'
     },
+    name : {
+        type: String,
+    },
+    mail: {
+        type: String,
+    },
     timestamp: {
         type: Number,
     },

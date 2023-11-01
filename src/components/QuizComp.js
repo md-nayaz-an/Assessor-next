@@ -9,6 +9,8 @@ import { useRecoilCallback, useSetRecoilState } from 'recoil';
 const QuizComp = (props) => {
     
     const [selected, setSelected] = useState(-1);
+    const [thoughts, setThoughts] = useState("");
+
     const setResponse = useSetRecoilState(updateResponseSelector);
 
     const onSave = () => {
@@ -18,7 +20,8 @@ const QuizComp = (props) => {
 
         const updateValue = {
             status: (selected === -1) ? 1 : 2,
-            options: (selected === -1) ? [] : [selected]
+            options: (selected === -1) ? [] : [selected],
+            thoughts
         }
 
         setResponse({
@@ -72,6 +75,14 @@ const QuizComp = (props) => {
                         ))
                     }
                 </ul>
+                
+                <textarea 
+                    className="textarea textarea-bordered w-full"
+                    placeholder="*Add your thoughts"
+                    value={thoughts}
+                    onChange={(e) => setThoughts(e.target.value)}
+                    required
+                />
             </div>
 
             <div className='bottom-0 w-full gap-x-2 gap-y-6 flex-wrap flex justify-between lg:justify-end lg:relative'>
@@ -90,6 +101,7 @@ const QuizComp = (props) => {
                 <button 
                     className='btn btn-accent w-full lg:w-44'
                     onClick={onSave}
+                    disabled={thoughts === ""}
                 >
                     Save and Next
                 </button>

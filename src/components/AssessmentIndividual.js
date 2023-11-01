@@ -30,6 +30,11 @@ const AssessmentIndividual = (props) => {
 
   	const [responses, setResponses] = useRecoilState(createResponseState(props.videoId));
 
+	useEffect(() => {
+	  console.log(responses);
+	
+	}, [responses])
+
 	const fetchVideoDetails = async () => {
 		const res = await fetch('/api/videos/' + props.videoId, {
             cache: 'no-store'
@@ -58,9 +63,14 @@ const AssessmentIndividual = (props) => {
 
 	const [start, setStart] = useState(false);
   	
-	const onStartClick = () => { 
+	const [name, setName] = useState("");
+	const [mail, setMail] = useState("");
+
+	const onStartClick = () => {
 		const initialResponseState = {
 			videoId: props.videoId,
+			name,
+			mail,
 			response: questions.map(question => ({
 				questionid: question._id, 
 				options: [],
@@ -74,10 +84,6 @@ const AssessmentIndividual = (props) => {
 	  	setStart(true);
 		setPlay(true);
 	}
-
-	useEffect(() => {
-	  console.log(responses);
-	}, [responses])
 
 	const [current, setCurrent] = useState(-1);
 
@@ -128,7 +134,7 @@ const AssessmentIndividual = (props) => {
 					{videoDetails.description}
 				</p>
 			</div>
-			<div className='mt-4 w-full max-w-full flex items-end flex-col lg:flex-row overflow-visible'>
+			<div className='mt-4 w-full max-w-full flex items-center flex-col lg:flex-row overflow-visible'>
 				<div className='w-full py-4 lg:w-1/2 flex-center flex-col gap-4'>
 					<div className='w-[90vw] aspect-video lg:w-full self-center lg:self-start  relative'>
 						<VideoClient
@@ -193,8 +199,28 @@ const AssessmentIndividual = (props) => {
 							}
 						</div>
 					</div>:
-					<div className='p-4 w-full flex-center lg:w-1/2 self-center'>
-						<button className='btn btn-accent' onClick={onStartClick}>Start Assessment</button>
+					<div className='p-4 w-full lg:w-1/2'>
+						<div className='w-full flex-center flex-col gap-2 self-center'>
+							<input
+								type="text"
+								placeholder="Name"
+								className="input input-bordered w-full max-w-xs" 	
+								value={name}
+								required
+								onChange={(e) => setName(e.target.value)}
+							/>
+
+							<input 
+								type="email"
+								placeholder="E-mail" 
+								className="input input-bordered w-full max-w-xs"
+								value={mail}
+								required
+								onChange={(e) => setMail(e.target.value)}
+							/>
+
+							<button className='btn btn-accent' onClick={onStartClick}>Start Assessment</button>
+						</div>
 					</div>
 				}
 			</div>
