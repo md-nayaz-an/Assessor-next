@@ -1,9 +1,10 @@
+import AdminDashboard from '@components/AdminDashboard'
 import React from 'react'
 
 const AdminHome = () => {
-  return (
-    <div>AdminHome</div>
-  )
+	return (
+		<AdminDashboard />
+	)
 }
 
 export default AdminHome

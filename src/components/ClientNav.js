@@ -15,7 +15,7 @@ const ClientNav = () => {
     ]
     
     return (
-        <nav className="flex-between w-full mb-8 pt-3 drop-shadow-lg rounded">
+        <nav className="flex-between w-full pt-3 drop-shadow-lg rounded">
             {/*<Link href="/" className="flex gap-2 flex-center">
                 <Image
                     src="/assets/icons/a.svg"

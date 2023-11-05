@@ -125,17 +125,19 @@ const AssessmentIndividual = (props) => {
 	}, [videoProgress])
 	
 	return (
-		<section className='py-5 w-full max-w-full flex-center flex-col'>
-			<div className=' flex-start flex-col self-start'>
-				<h1 className='head_text text-left'>
-					{videoDetails.title}
-				</h1>
-				<p className='desc text-left'>
-					{videoDetails.description}
-				</p>
-			</div>
-			<div className='mt-4 w-full max-w-full flex items-center flex-col lg:flex-row overflow-visible'>
-				<div className='w-full py-4 lg:w-1/2 flex-center flex-col gap-4'>
+		<section className='w-full max-w-full flex-center flex-col'>
+			
+			<div className='mt-4 w-full max-w-full flex flex-col lg:flex-row overflow-visible'>
+				<div className='w-full py-4 lg:w-1/2 flex flex-col gap-4'>
+					<div className=' flex-start flex-col self-start'>
+						<h1 className='head_text text-left'>
+							{videoDetails.title}
+						</h1>
+						<p className='desc text-left'>
+							{videoDetails.description}
+						</p>
+					</div>
+					
 					<div className='w-[90vw] aspect-video lg:w-full self-center lg:self-start  relative'>
 						<VideoClient
 							playerRef={playerRef}
@@ -199,7 +201,7 @@ const AssessmentIndividual = (props) => {
 							}
 						</div>
 					</div>:
-					<div className='p-4 w-full lg:w-1/2'>
+					<div className='p-4 flex-center w-full lg:w-1/2'>
 						<div className='w-full flex-center flex-col gap-2 self-center'>
 							<input
 								type="text"

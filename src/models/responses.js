@@ -24,7 +24,13 @@ const ResponseSchema = new Schema ({
         },
         status: {
             type: Number,
-        }
+        },
+        thoughts: {
+            type: String,
+        },
+        probability: {
+            type: Number,
+        },
     }]
 })
 
