@@ -1,4 +1,7 @@
+import formatTooltipString from '@utils/formatTooltipString';
 import React from 'react'
+import { useEffect } from 'react';
+import { Tooltip } from 'react-tooltip';
 
 function getStatusClass(status) {
     switch (status) {
@@ -16,19 +19,41 @@ function getStatusClass(status) {
   }
 
 const Steps = (props) => {
+    useEffect(() => {
+      console.log(props.prevResponses);
+      console.log(props.responses.response);
+    }, [props])
+    
     return (
-        <div className="overflow-x-auto flex-center">
-            <ul className="steps">
+        <div className="flex-center">
+            <ul className="steps overflow-visible">
                 {
                     props.responses.response.map((response, index) => (
-                        <li 
+                      <li 
                             key={index}
                             className={`step ${
                                 getStatusClass(response.status)
                             } ${
                                 (index == props.current) ? 'after:border' : ''
-                            }`}
-                        />
+                            } step-${index}`}
+                      >
+                      {
+                        (response.status >= 2) &&
+                          <Tooltip
+                            anchorSelect={`.step-${index}`}
+                          >
+                            <div className=' flex flex-col text-left'>
+                              <h3 className=' text-lg'>{props.prevResponses[index].question}</h3>
+                              {
+                                props.prevResponses[index].options.map( res => (
+                                  <span>{`${res.count} chose '${res.option}'`}</span>
+                                ))
+                              }
+                            </div>
+                          </Tooltip>
+                      }
+                        
+                      </li>
                     ))
                 }
             </ul>

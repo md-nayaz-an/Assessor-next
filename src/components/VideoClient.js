@@ -14,6 +14,7 @@ const VideoClient = (props) => {
             onPlay={() => props.setPlay(true)}
             onPause={() => props.setPlay(false)}
             onProgress={(e) => props.setVideoProgress(e)}
+            controls={props.admin}
         />
     )
 }

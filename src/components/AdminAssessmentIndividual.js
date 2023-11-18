@@ -105,6 +105,7 @@ const AdminAssessmentIndividual = (props) => {
 							setVideoProgress={setVideoProgress}
 							play={play}
 							setPlay={setPlay}
+							admin={true}
 						/>
 					</div>
 					

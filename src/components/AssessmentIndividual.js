@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
 
 import dynamic from 'next/dynamic';
+import mergeQuestionResponseForStepper from '@utils/mergeQuestionResponseForStepper';
 const VideoClient = dynamic(() => import("./VideoClient"), { ssr: false });
 
 const AssessmentIndividual = (props) => {
@@ -30,6 +31,7 @@ const AssessmentIndividual = (props) => {
 
   	const [responses, setResponses] = useRecoilState(createResponseState(props.videoId));
 
+	const [prevResponses, setPrevResponses] = useState([]);
 	useEffect(() => {
 	  console.log(responses);
 	
@@ -41,6 +43,15 @@ const AssessmentIndividual = (props) => {
         });
 		const data = await res.json();
 		setVideoDetails(data);
+		//console.log(data);
+	}
+	
+	const fetchPrevResponses = async () => {
+		const res = await fetch('/api/responses/' + props.videoId, {
+            cache: 'no-store'
+        });
+		const data = await res.json();
+		setPrevResponses(data);
 		//console.log(data);
 	}
 	
@@ -57,7 +68,7 @@ const AssessmentIndividual = (props) => {
 		if(props.videoId) {
 			fetchVideoDetails();
 			fetchQuestions();
-		
+			fetchPrevResponses();
 		}
 	}, [props])
 
@@ -173,6 +184,7 @@ const AssessmentIndividual = (props) => {
 						<Steps 
 							responses={responses}
 							current={current}
+							prevResponses={mergeQuestionResponseForStepper(questions, prevResponses)}
 						/>
 
 						<div className='w-full rounded-lg'>
