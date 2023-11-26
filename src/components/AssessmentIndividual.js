@@ -24,7 +24,6 @@ const AssessmentIndividual = (props) => {
 		title: "",
 		description: "",
 		url: "",
-		
 	});
 
 	const [questions, setQuestions] = useState([]);
@@ -119,7 +118,10 @@ const AssessmentIndividual = (props) => {
 			});
 
 			if(response.ok) {
+				const data = response.json();
+				console.log(data._id);
 				router.push("/client/assessments");
+				
 			}
 		} catch (error) {
 			console.error(error);

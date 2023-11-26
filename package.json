@@ -18,7 +18,8 @@
     "react-player": "^2.13.0",
     "react-tooltip": "^5.23.0",
     "recoil": "^0.7.7",
-    "tailwindcss": "3.3.3"
+    "tailwindcss": "3.3.3",
+    "victory": "^36.6.12"
   },
   "devDependencies": {
     "daisyui": "^3.7.7"

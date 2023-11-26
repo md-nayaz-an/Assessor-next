@@ -79,11 +79,9 @@ const QuizComp = (props) => {
                         ))
                     }
                 </ul>
-                
-                <div className='divider'>OR</div>
-                
+
                 <label className="label w-full">
-                    Give your probability
+                    What is your confidence level in making this guess?
                 </label>
                 
                 <div className="flex-center w-full gap-2">
@@ -94,7 +92,6 @@ const QuizComp = (props) => {
                         value={probability} 
                         className="range range-xs"
                         onChange={(e) => {
-                            setSelected(-1);
                             setProbability(e.target.value);
                         }}    
                     />
@@ -105,19 +102,19 @@ const QuizComp = (props) => {
                     </div>
                 </div>
                 
-            </div>
-
-            <div className='w-full flex-wrap flex justify-between gap-2 lg:-order-1'>
                 <textarea 
-                    className={"textarea textarea-bordered w-full lg:w-3/6 " +
+                    className={"textarea textarea-bordered mt-4 w-full " +
                         ((probability > -1 || selected > -1) ?
                         "textarea-accent" : "")
                     }
-                    placeholder="*Add your thoughts"
+                    placeholder="*Why do you feel so?"
                     value={thoughts}
                     onChange={(e) => setThoughts(e.target.value)}
                     required
                 />
+            </div>
+
+            <div className='w-full flex-wrap flex justify-between gap-2 lg:-order-1'>
                 <button 
                     className='btn w-2/5 lg:w-1/6 lg:-order-1'
                     onClick={() => {
@@ -130,7 +127,7 @@ const QuizComp = (props) => {
                 <button 
                     className='btn btn-accent w-2/5 lg:w-1/6'
                     onClick={onSave}
-                    disabled={thoughts === ""}
+                    disabled={selected === -1 || probability === -1 || thoughts === ""}
                 >
                     Next
                 </button>
