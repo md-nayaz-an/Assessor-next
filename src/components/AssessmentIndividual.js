@@ -115,12 +115,18 @@ const AssessmentIndividual = (props) => {
 			const response = await fetch("/api/responses/new", {
 				method: "POST",
 				body: JSON.stringify(responses),
+			})
+			.then(res => res.json())
+			.then(data => {
+				router.push("/client/responses/" + data._id + "/" + props.videoId);
+			})
+			.catch(err => {
+				console.error(err);
 			});
 
 			if(response.ok) {
 				const data = response.json();
 				console.log(data._id);
-				router.push("/client/assessments");
 				
 			}
 		} catch (error) {
@@ -203,6 +209,10 @@ const AssessmentIndividual = (props) => {
 										(current >= 0 && current < questions.length) &&
 										<div className="relative h-full">
 											<div className="absolute inset-0 w-20 h-20 flex-center -translate-x-1/2">
+												<span className="countdown">
+													<span style={{"--value": Math.floor((questions[current].timestamp - videoProgress.playedSeconds) / 60)}}></span>
+												</span>
+												:
 												<span className="countdown">
 													<span style={{ "--value": Math.floor(questions[current].timestamp - videoProgress.playedSeconds) % 60 }}></span>
 												</span>

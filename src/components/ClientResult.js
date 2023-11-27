@@ -4,7 +4,7 @@ import mergeQuestionResponseForStepper from '@utils/mergeQuestionResponseForStep
 import React from 'react'
 import { useEffect } from 'react';
 import { useState } from 'react';
-import { VictoryPie } from 'victory';
+import { VictoryLabel, VictoryPie } from 'victory';
 
 const ClientResult = (props) => {
 
@@ -55,12 +55,16 @@ const ClientResult = (props) => {
 	const [curr, setCurr] = useState({});
 	useEffect(() => {
 		setResult(mergeQuestionResponseForStepper(questions, responses));
-		console.log(result);
+		
 
 		setCurr(responses.find(res => res._id === props.responseId));
+		console.log(result);
 		console.log(curr)
 	}, [responses])
 
+	useEffect(() => {
+		console.log(result);
+	}, [result])
 
   	return (
 		<section className='w-full flex-center flex-col'>
@@ -107,32 +111,49 @@ const ClientResult = (props) => {
 											</div>
 										))
 									}
+
+									<div
+										className='mt-8'
+									>
+										{ `Your selection, "${result[idx].options[curr.response[idx].options[0]].option}" was chosen by 
+											${(( result[idx].options[curr.response[idx].options[0]].count / result[idx].options.reduce((acc, d) => acc + d.count, 0)) * 100).toFixed(2)}%` 
+										}
+									</div>
 								</div>
 
 								<div
 									className='p-4'
 								>
 									{
-										console.log(res.options.map(r => {
+										console.log(res.options.map((r, i) => {
 											return {
 												x: r.option,
 												y: r.count,
-												label: r.option
+												color: (questions[idx].options[i].isCorrect) ? '#00CDB8' :
+														(curr.response[idx].options[0] === i) ? '#A6ADBB' : ""
 											}
 										}))
 									}
 									<VictoryPie
-										data={res.options.map(r => {
+										data={res.options.map((r, i) => {
 											return {
 												x: r.option,
-												y: r.count
+												y: r.count,
+												color: (questions[idx].options[i].isCorrect) ? '#00CDB8' :
+														(curr.response[idx].options[0] === i) ? '#A6ADBB' : ""
 											}
 										})}
 
-										labels={({ datum }) => `${datum.x}(${datum.y})`}
+										labelComponent={<CustomLabel />}
+										colorScale={res.options.map((r, i) => {
+											return (questions[idx].options[i].isCorrect) ? '#00CDB8' :
+														(curr.response[idx].options[0] === i) ? '#A6ADBB' : ""
+										})}
 
-										innerRadius={100}
+										innerRadius={({ datum }) => (datum.color === "#A6ADBB") ? 110 : 100}
+										radius={({ datum }) => (datum.color === "#A6ADBB") ? 160 : 150}
 										padAngle={5}
+										
 										style={{
 											data: {
 												fillOpacity: 0.9, stroke: "#2A323C", strokeWidth: 2
@@ -152,5 +173,13 @@ const ClientResult = (props) => {
 		</section>
   	)
 }
-
+const CustomLabel = (props) => {
+	const percentage = ((props.datum.y / props.data.reduce((acc, d) => acc + d.y, 0)) * 100).toFixed(2) + '%';
+  
+	return (
+	  <g>
+		<VictoryLabel {...props} text={`${props.datum.x}\n${percentage}`} />
+	  </g>
+	);
+  };
 export default ClientResult;
