@@ -181,7 +181,7 @@ const AssessmentIndividual = (props) => {
 					
 					{
 						(start) ?
-							<button className='btn btn-primary self-end' onClick={onSubmit}>End and Submit</button> :
+							<button className='btn btn-primary self-end' onClick={onSubmit} disabled={current < responses.response.length}>End and Submit</button> :
 							<></>
 					}
 				</div>
