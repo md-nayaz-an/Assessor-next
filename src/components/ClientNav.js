@@ -30,7 +30,6 @@ const ClientNav = () => {
                 <div className="navbar-start">
                     <Link 
                         className="btn btn-ghost normal-case text-xl"
-                        href="/"
                     >
                             Assessor
                     </Link>
