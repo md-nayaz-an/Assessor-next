@@ -28,11 +28,11 @@ const ClientNav = () => {
 
             <div className="navbar bg-base-100">
                 <div className="navbar-start">
-                    <Link 
+                    <button
                         className="btn btn-ghost normal-case text-xl"
                     >
                             Assessor
-                    </Link>
+                    </button>
                 </div>
                 <div className="navbar-end hidden lg:flex">
                     <ul className="menu menu-horizontal px-1">
