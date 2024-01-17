@@ -1,4 +1,5 @@
 import mongoose, { Schema, models, model} from "mongoose";
+import Questions from "./questions";
 
 const VideoSchema = new Schema ({
     title: {
@@ -11,6 +12,18 @@ const VideoSchema = new Schema ({
         type: String,
     },
 })
+
+/*
+VideoSchema.pre('deleteOne', async function(next) {
+    try {
+        console.log(this.getQuery()._id);
+        await Questions.deleteMany({ videoid: this.getQuery()._id });
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
+*/
 
 const Videos = models.Videos || model('Videos', VideoSchema);
 

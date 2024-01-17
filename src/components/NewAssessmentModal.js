@@ -110,6 +110,7 @@ const NewAssessment = ({ setVideos }) => {
 								className="btn btn-primary w-1/2" 
 								type='submit'
 								onClick={onSave}
+								disabled={title === "" || url === ""}
 							>
 								Save
 							</button>
