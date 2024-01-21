@@ -48,9 +48,9 @@ const Assessments = ({ admin }) => {
     
     const onClick = (videoId, videoUrlId) => {
         if(admin)
-            router.push(`/admin/assessments/${videoId}?` + createQueryString("videoUrlId", videoUrlId));
+            router.push(`/admin/assessments/${videoId}`);
         else
-            router.push(`/client/assessments/${videoId}?` + createQueryString("videoUrlId", videoUrlId));
+            router.push(`/client/calibration/${videoId}`);
     }
 
     

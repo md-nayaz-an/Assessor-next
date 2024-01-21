@@ -23,7 +23,8 @@
     "recoil": "^0.7.7",
     "tailwindcss": "3.3.3",
     "text-encoding": "^0.7.0",
-    "victory": "^36.6.12"
+    "victory": "^36.6.12",
+    "webgazer": "^3.3.0"
   },
   "devDependencies": {
     "@shelf/jest-mongodb": "^4.2.0",
