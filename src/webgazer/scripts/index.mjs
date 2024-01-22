@@ -1,3 +1,5 @@
+"use client";
+
 import '@tensorflow/tfjs';
 //import(/* webpackPreload: true */ '@tensorflow/tfjs');
 //import(/* webpackChunkName: 'pageA' */ './vendors~main.js')

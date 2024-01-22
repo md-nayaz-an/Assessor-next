@@ -1,9 +1,13 @@
+"use client";
+
 // helper functions
 
+if(typeof window !== "undefined") {
 /**
  * Provides requestAnimationFrame in a cross browser way.
  */
 window.requestAnimFrame = (function() {
+  console.log(window);
   return window.requestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
     window.mozRequestAnimationFrame ||
@@ -25,3 +29,4 @@ window.cancelRequestAnimFrame = (function() {
     window.msCancelRequestAnimationFrame ||
     window.clearTimeout;
 })();
+}

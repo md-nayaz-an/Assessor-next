@@ -1,4 +1,5 @@
-'use strict';
+"use client";
+
 (function() {
 
     self.webgazer = self.webgazer || {};

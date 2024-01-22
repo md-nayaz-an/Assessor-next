@@ -31,7 +31,8 @@ const ResponseSchema = new Schema ({
         probability: {
             type: Number,
         },
-    }]
+    }],
+    
 })
 
 const Responses = models.Responses || model('Responses', ResponseSchema);

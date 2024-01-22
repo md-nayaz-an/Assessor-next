@@ -8,28 +8,7 @@ function Calibration() {
 
   const webgazer = useContext(webgazerContext);
 
-  useEffect(() => {
-    const resizeCanvas = () => {
-      const canvas = document.getElementById('plotting_canvas');
-      const context = canvas.getContext('2d');
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      
-      canvas.width = window.innerWidth - 20;
-      canvas.height = window.innerHeight - 20;
-    };
-
-    if(window !== null) {
-      resizeCanvas();
-      window.addEventListener('resize', resizeCanvas);
-    }
-
-    return () => {
-      if(window !== null)
-        window.removeEventListener('resize', resizeCanvas);
-    };
-  }, [window]);
-
-  const [points, setPoints] = useState(true);
+  const [points, setPoints] = useState(false);
   
   useEffect(() => {
     async function startGaze() {
@@ -57,7 +36,7 @@ function Calibration() {
         
     }
 
-    if(webgazer !== null && window !== null)
+    if(webgazer !== null && typeof window !== "defined")
       startGaze();
     return () => {
       window.addEventListener("beforeunload", () => {
@@ -100,12 +79,15 @@ function Calibration() {
     let num = numbers[shuffleIndex];
     setShuffleIndex(shuffleIndex + 1);
 
-    console.log(num);
     return num;
   };
   
   
   const handleButtonClick = (buttonIndex) => {
+
+    if(!points)
+      return;
+
     const newClicksArray = [...clicksArray];
     newClicksArray[buttonIndex] += 1;
     setClicksArray(newClicksArray);
@@ -142,7 +124,7 @@ function Calibration() {
               title="calibration_buttons"
               onClick={() => handleButtonClick(buttonIndex)}
               disabled={points === false && activeButtonIndex !== null && activeButtonIndex !== buttonIndex}
-              className={`button ${points !== false && activeButtonIndex !== null && activeButtonIndex === buttonIndex ? 'active' : ''} ${clicksArray[buttonIndex] >= clickLimit ? 'completed' : ''}`}
+              className={`button ${activeButtonIndex !== null && activeButtonIndex === buttonIndex ? 'active' : ''} ${clicksArray[buttonIndex] >= clickLimit ? 'completed' : ''}`}
             ></button>
           );
         })}
@@ -152,7 +134,6 @@ function Calibration() {
 
   return (
     <>
-      <canvas id="plotting_canvas" width="500" height="500" ></canvas>
       <div
         className="calib_canvas"
       >
