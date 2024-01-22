@@ -3,8 +3,11 @@
 import { useContext, useEffect, useState } from "react";
 import "@webgazer/calibration.css";
 import webgazerContext from "@webgazer/webgazerContext";
+import { useRouter } from "next/navigation";
 
-function Calibration() {
+function Calibration({ videoId }) {
+  
+  const router = useRouter();
 
   const webgazer = useContext(webgazerContext);
 
@@ -48,6 +51,10 @@ function Calibration() {
 
   useEffect(() => {
     setActiveButtonIndex(generateRandomIndex());
+
+    return () => {
+      webgazer.pause();
+    }
   }, []);
   
 
@@ -62,7 +69,7 @@ function Calibration() {
 
   const rows = 5; // Number of rows
   const buttonsInRow = [3, 2, 3, 2, 3]; // Number of buttons in each row
-  const clickLimit = 10; // Click limit to disable buttons
+  const clickLimit = 1; // Click limit to disable buttons
 
   const [numbers] = useState(shuffleArray(Array.from({ length: 13 }, (_, index) => index)));
   const [shuffleIndex, setShuffleIndex] = useState(0);
@@ -74,7 +81,7 @@ function Calibration() {
   // Function to generate a random index for the next active button
   const generateRandomIndex = () => {
     if(shuffleIndex >= 13)
-      return -1;
+      return -2;
 
     let num = numbers[shuffleIndex];
     setShuffleIndex(shuffleIndex + 1);
@@ -87,7 +94,7 @@ function Calibration() {
 
     if(!points)
       return;
-
+    
     const newClicksArray = [...clicksArray];
     newClicksArray[buttonIndex] += 1;
     setClicksArray(newClicksArray);
@@ -100,7 +107,7 @@ function Calibration() {
     // Check if all buttons have reached the click limit
     if (newClicksArray.every((clicks) => clicks >= clickLimit)) {
       console.log('All buttons completed');
-      setActiveButtonIndex(-1);
+      setActiveButtonIndex(-2);
     }
   };
 
@@ -123,7 +130,7 @@ function Calibration() {
               key={buttonInRow}
               title="calibration_buttons"
               onClick={() => handleButtonClick(buttonIndex)}
-              disabled={points === false && activeButtonIndex !== null && activeButtonIndex !== buttonIndex}
+              disabled={activeButtonIndex !== null && activeButtonIndex !== buttonIndex}
               className={`button ${activeButtonIndex !== null && activeButtonIndex === buttonIndex ? 'active' : ''} ${clicksArray[buttonIndex] >= clickLimit ? 'completed' : ''}`}
             ></button>
           );
@@ -139,6 +146,31 @@ function Calibration() {
       >
         {renderButtons()}
       </div>
+      {
+        activeButtonIndex === -2 &&
+        <div
+          className="absolute top-20 flex gap-10"
+        >
+          <button
+            onClick={() => {
+              setShuffleIndex(1);
+              setClicksArray(Array(13).fill(0));
+              setActiveButtonIndex(numbers[0]);
+            }}
+            className="btn btn-wide btn-neutral"
+          >
+            Redo
+          </button>
+          <button
+            onClick={() => {
+              router.push(`/client/assessments/${videoId}`);
+            }}
+            className="btn btn-wide btn-accent"
+          >
+            Proceed
+          </button>
+        </div>
+      }
     </>
   );
 }

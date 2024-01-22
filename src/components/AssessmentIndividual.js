@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react'
+import React, { useContext } from 'react'
 import { useState } from 'react';
 import { useEffect } from 'react';
 import Steps from './Steps';
@@ -12,9 +12,35 @@ import { useRef } from 'react';
 
 import dynamic from 'next/dynamic';
 import mergeQuestionResponseForStepper from '@utils/mergeQuestionResponseForStepper';
+import webgazerContext from '@webgazer/webgazerContext';
 const VideoClient = dynamic(() => import("./VideoClient"), { ssr: false });
 
 const AssessmentIndividual = (props) => {
+
+	
+	const webgazer = useContext(webgazerContext);
+	const [gazePoints, setGazePoints] = useState([]);
+
+	useEffect(() => {
+		webgazer.resume();
+
+		const gazeInterval = setInterval(() => {
+			const pred = webgazer.getCurrentPrediction()
+			pred.then((prediction) => {
+				if (prediction) {
+				  setGazePoints((prevPredictions) => [...prevPredictions, {x: prediction.x, y: prediction.y}]);
+				}
+			});
+
+			console.log(gazePoints);
+		}, 1000);
+	
+	  	return () => {
+			clearInterval(gazeInterval);
+			webgazer.pause();
+		}
+	}, [webgazer])
+	
 
 	const router = useRouter();
 
@@ -31,10 +57,6 @@ const AssessmentIndividual = (props) => {
   	const [responses, setResponses] = useRecoilState(createResponseState(props.videoId));
 
 	const [prevResponses, setPrevResponses] = useState([]);
-	useEffect(() => {
-	  console.log(responses);
-	
-	}, [responses])
 
 	const fetchVideoDetails = async () => {
 		const res = await fetch('/api/videos/' + props.videoId, {
@@ -114,7 +136,9 @@ const AssessmentIndividual = (props) => {
 		try {
 			const response = await fetch("/api/responses/new", {
 				method: "POST",
-				body: JSON.stringify(responses),
+				body: JSON.stringify({
+					...responses
+				}),
 			})
 			.then(res => res.json())
 			.then(data => {
