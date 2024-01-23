@@ -69,7 +69,7 @@ function Calibration({ videoId }) {
 
   const rows = 5; // Number of rows
   const buttonsInRow = [3, 2, 3, 2, 3]; // Number of buttons in each row
-  const clickLimit = 1; // Click limit to disable buttons
+  const clickLimit = 10; // Click limit to disable buttons
 
   const [numbers] = useState(shuffleArray(Array.from({ length: 13 }, (_, index) => index)));
   const [shuffleIndex, setShuffleIndex] = useState(0);
@@ -146,6 +146,11 @@ function Calibration({ videoId }) {
       >
         {renderButtons()}
       </div>
+      <p
+        className=" z-0 absolute opacity-50 top-20"
+      >
+        Keep clicking on all the Glowing dots until all dots turn green.
+      </p>
       {
         activeButtonIndex === -2 &&
         <div

@@ -32,7 +32,9 @@ const ResponseSchema = new Schema ({
             type: Number,
         },
     }],
-    
+    gazePoints: {
+        type: Array
+    }
 })
 
 const Responses = models.Responses || model('Responses', ResponseSchema);

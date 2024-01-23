@@ -20,27 +20,71 @@ const AssessmentIndividual = (props) => {
 	
 	const webgazer = useContext(webgazerContext);
 	const [gazePoints, setGazePoints] = useState([]);
+	const [mousePoints, setMousePoints] = useState({x: -1, y: -1});
 
 	useEffect(() => {
-		webgazer.resume();
+		
+		webgazer?.pause();
 
-		const gazeInterval = setInterval(() => {
-			const pred = webgazer.getCurrentPrediction()
-			pred.then((prediction) => {
-				if (prediction) {
-				  setGazePoints((prevPredictions) => [...prevPredictions, {x: prediction.x, y: prediction.y}]);
-				}
-			});
+		return () => {
+			webgazer?.pause();
+		}
+	},[webgazer]);
 
-			console.log(gazePoints);
-		}, 1000);
-	
+	const [intervalStart, setIntervalStart] = useState(false);
+	useEffect(() => {
+		let gazeInterval;
+
+		document.addEventListener('mousemove', onMouseUpdate, false);
+		document.addEventListener('mouseenter', onMouseUpdate, false);
+			
+		function onMouseUpdate(e) {
+		  setMousePoints({
+			x: e.pageX,
+			y: e.pageY
+		  })
+		}
+
+
+		if(intervalStart) {
+			gazeInterval = setInterval(() => {
+				const currentTime = new Date().getTime();
+
+				let pred = {x: -1, y: -1};
+
+				if(webgazer !== null)
+					pred = webgazer.getCurrentPrediction();
+
+				pred.then((prediction) => {
+					if (prediction) {
+						setGazePoints((prevPredictions) => [
+							...prevPredictions, 
+							{
+								gaze: {
+									x: prediction.x,
+									y: prediction.y
+								},
+								mouse: {
+									x: mousePoints.x,
+									y: mousePoints.y
+								},
+								timestamp: currentTime
+							}
+						]);
+					}
+				});
+
+			}, 1000);
+		}
+
 	  	return () => {
 			clearInterval(gazeInterval);
-			webgazer.pause();
 		}
-	}, [webgazer])
+	}, [intervalStart])
 	
+	useEffect(() => {
+		console.log(gazePoints[gazePoints.length - 1]?.mouse);
+	}, [gazePoints]);
 
 	const router = useRouter();
 
@@ -99,6 +143,8 @@ const AssessmentIndividual = (props) => {
 	const [mail, setMail] = useState("");
 
 	const onStartClick = () => {
+		webgazer.resume();
+
 		const initialResponseState = {
 			videoId: props.videoId,
 			name,
@@ -115,6 +161,9 @@ const AssessmentIndividual = (props) => {
 	  	setResponses(initialResponseState);
 	  	setStart(true);
 		setPlay(true);
+
+		
+		setIntervalStart(true);
 	}
 
 	const [current, setCurrent] = useState(-1);
@@ -132,12 +181,14 @@ const AssessmentIndividual = (props) => {
 
 	const onSubmit = async () => {
 		console.log("submited");
-		
+		webgazer.end();
+
 		try {
 			const response = await fetch("/api/responses/new", {
 				method: "POST",
 				body: JSON.stringify({
-					...responses
+					...responses,
+					gazePoints
 				}),
 			})
 			.then(res => res.json())
@@ -150,6 +201,7 @@ const AssessmentIndividual = (props) => {
 
 			if(response.ok) {
 				const data = response.json();
+				console.log(data);
 				console.log(data._id);
 				
 			}
