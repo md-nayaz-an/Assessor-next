@@ -22,7 +22,7 @@ const Steps = (props) => {
     useEffect(() => {
       console.log(props.prevResponses);
       console.log(props.responses.response);
-    }, [props])
+    }, [])
     
     return (
         <div className="flex-center">

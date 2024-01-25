@@ -29,6 +29,7 @@ const AdminQuestionList = (props) => {
                 summary: "",
                 question:"",
                 options: [],
+                sliderquestion: "",
             }
         })
     }
@@ -268,6 +269,21 @@ export const ListComp = (props) => {
                     </button>
 
                     }
+                    <label className="label">
+                        <span className="label-text">Slider Question</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        placeholder="Enter Slider Question" 
+                        className="input input-bordered w-full"
+                        value={props.cloud && question.sliderquestion === "" || question.sliderquestion === undefined ? "(DEFAULT)What is your confidence level in making this guess" : question.sliderquestion }
+                        onChange={(e) => setQuestion(q => ({
+                            ...q,
+                            sliderquestion: e.target.value
+                        }))}
+                        
+                        disabled={props.cloud}
+                    />
                 </div>
 
                 {
@@ -320,6 +336,7 @@ const ListOptions = (props) => {
                             ...prevOptions.slice(props.index + 1)
                         ]);
                     }}
+                    disabled={props.cloud}
                 />
                 <input 
                     type="checkbox" 
@@ -335,6 +352,7 @@ const ListOptions = (props) => {
                             ...prevOptions.slice(props.index + 1)
                         ]);
                     }}
+                    disabled={props.cloud}
                 />
             </div>
         </div>

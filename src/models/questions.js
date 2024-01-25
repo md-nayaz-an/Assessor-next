@@ -11,6 +11,10 @@ const QuestionSchema = new Schema ({
     question: {
         type: String,
     },
+    // resolve default by providing edit option!! 
+    sliderquestion: {
+        type: String,
+    },
     options: {
         type: Array,
     },

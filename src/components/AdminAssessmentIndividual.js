@@ -66,7 +66,7 @@ const AdminAssessmentIndividual = (props) => {
 		if(res.ok) {
 			const data = await res.json();
 			console.log(data);
-			setCloudQuestions(data);
+			setCloudQuestions(prev => ([...prev, ...data]));
 			deleteQuestions(props.videoId);
 		}
 		else {
@@ -85,6 +85,10 @@ const AdminAssessmentIndividual = (props) => {
 			playerRef.current.seekTo(playerRef.current.getCurrentTime() - 10);
 		}
 	}
+	
+	useEffect(() => {
+		console.log(cloudQuestions);
+	}, [cloudQuestions]);
 	
 	return (
 		<section className='py-5 w-full max-w-full flex-center flex-col'>

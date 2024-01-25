@@ -81,7 +81,10 @@ const QuizComp = (props) => {
                 </ul>
 
                 <label className="label w-full">
-                    What is your confidence level in making this guess?
+                    {props.question.sliderquestion === "" || props.question.sliderquestion === undefined  ?  
+                        "What is your confidence level in making this guess?" :
+                        props.question.sliderquestion
+                    }
                 </label>
                 
                 <div className="flex-center w-full gap-2">
