@@ -105,6 +105,7 @@ const QuizComp = (props) => {
                     </div>
                 </div>
                 
+                // TODO Speech-to-Text Input
                 <textarea 
                     className={"textarea textarea-bordered mt-4 w-full " +
                         ((probability > -1 || selected > -1) ?
