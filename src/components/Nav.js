@@ -1,8 +1,10 @@
-"use client";
-
 import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { options } from "@app/api/auth/[...nextauth]/options";
 
-const Nav = () => {
+const Nav = async () => {
+
+    const session = await getServerSession(options);
 
     const menu = [
         {
@@ -48,6 +50,18 @@ const Nav = () => {
                                 </li>
                             ))
                         }
+
+                        <li>
+                            {
+                                session ? 
+                                <Link href="/api/auth/signout?callbackUrl=/">
+                                    Logout
+                                </Link> :
+                                <Link href="/api/auth/signin">
+                                    Login
+                                </Link>
+                            }
+                        </li>
                     </ul>
                 </div>
 

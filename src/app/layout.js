@@ -2,6 +2,7 @@
 
 import Nav from '@components/ClientNav';
 import '@styles/globals.css';
+import { SessionProvider } from 'next-auth/react';
 import { RecoilRoot } from 'recoil';
 
 export default function RootLayout({ children }) {
@@ -9,7 +10,9 @@ export default function RootLayout({ children }) {
 		<html lang="en">
 			<body>
 				<main className='app'>
-					{children}
+					<SessionProvider>
+						{children}
+					</SessionProvider>
 				</main>
 			</body>
 		</html>
