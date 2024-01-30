@@ -1,9 +1,10 @@
-"use client";
-
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 
 const ClientNav = () => {
+    
+    const session = useSession();
 
     const menu = [
         {
@@ -45,6 +46,17 @@ const ClientNav = () => {
                                 </li>
                             ))
                         }
+                        <li>
+                            {
+                                session ? 
+                                <Link href="/api/auth/signout?callbackUrl=/">
+                                    Logout
+                                </Link> :
+                                <Link href="/api/auth/signin">
+                                    Login
+                                </Link>
+                            }
+                        </li>
                     </ul>
                 </div>
 
@@ -63,6 +75,17 @@ const ClientNav = () => {
                                     </li>
                                 ))
                             }
+                            <li>
+                                {
+                                    session ?
+                                    <Link href="/api/auth/signout?callbackUrl=/">
+                                        Logout
+                                    </Link> :
+                                    <Link href="/api/auth/signin">
+                                        Login
+                                    </Link>
+                                }
+                            </li>
                         </ul>
                     </div>
                 </div>

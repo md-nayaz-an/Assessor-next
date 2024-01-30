@@ -1,0 +1,24 @@
+import { withAuth } from "next-auth/middleware"
+import { NextResponse } from "next/server";
+
+// TODO build more secure workflow using switch
+export default withAuth(
+    async function middleware(req) {
+        
+        const path = req.nextUrl.pathname;
+        const token = req.nextauth.token;
+
+        if(path.startsWith('/admin') && token.role !== "admin")
+            return NextResponse.redirect(new URL('/client', req.url));
+
+        if(!path.startsWith("/client/") && path !== "/client" && token.role === "client")
+            return NextResponse.redirect(new URL("/client", req.url));
+    },
+    {
+        callbacks: {
+            authorized: ({ token }) => !!token,
+        },
+    }
+)
+
+export const config = { matcher: ["/admin", "/client"] };

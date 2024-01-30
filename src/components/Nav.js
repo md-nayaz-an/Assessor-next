@@ -80,6 +80,18 @@ const Nav = async () => {
                                     </li>
                                 ))
                             }
+
+                            <li>
+                                {
+                                    session ? 
+                                    <Link href="/api/auth/signout?callbackUrl=/">
+                                        Logout
+                                    </Link> :
+                                    <Link href="/api/auth/signin">
+                                        Login
+                                    </Link>
+                                }
+                        </li>
                         </ul>
                     </div>
                 </div>
