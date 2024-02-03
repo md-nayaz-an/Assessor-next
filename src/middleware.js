@@ -8,10 +8,12 @@ export default withAuth(
         const path = req.nextUrl.pathname;
         const token = req.nextauth.token;
 
-        if(path.startsWith('/admin') && token.role !== "admin")
+        console.log(token);
+
+        if(path.startsWith('/admin') && token.userData?.role !== "admin")
             return NextResponse.redirect(new URL('/client', req.url));
 
-        if(!path.startsWith("/client/") && path !== "/client" && token.role === "client")
+        if(!path.startsWith("/client/") && path !== "/client" && token.userData?.role === "client")
             return NextResponse.redirect(new URL("/client", req.url));
     },
     {

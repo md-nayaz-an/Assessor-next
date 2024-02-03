@@ -8,11 +8,11 @@ export const options = {
             async profile(profile) {
                 try {
                     await connectToDB();
-    
+
                     let user = await User.findOne({
                         email: profile.email
                     });
-    
+
                     if(!user) {
                         user = await User.create({
                             email: profile.email,
@@ -23,9 +23,11 @@ export const options = {
                         console.log("User created");
                     }
 
+                    console.log(user);
+
                     return {
                         id: user.id,
-                        ...profile,
+                        ...user,
                         role: user.role,
                     }
 
@@ -37,24 +39,27 @@ export const options = {
 
             clientId: process.env.GOOGLE_ID,
             clientSecret: process.env.GOOGLE_SECRET,
-        },
-        )
+        })
     ],
 
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
+            if (trigger === "update" && session) {
+                return { ...token, userData: session?.userData };
+            }
+
             if (user) {
-                token.role = user.role;
+                //console.log("user in jwt", user);
                 token.id = user.id;
-                token.image = user.picture;
+                token.userData = user._doc;
             }
             return token;
         },
         async session({ session, token }) {
             if (session?.user) {
-                session.user.role = token.role;
+                //console.log("token in session", token.userData);
                 session.user.id = token.id;
-                session.user.image = token.image
+                session.userData = token.userData;
             }
             return session;
         },

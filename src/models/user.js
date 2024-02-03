@@ -12,6 +12,18 @@ const UserSchema = new Schema ({
     },
     image: {
         type: String,
+    },
+    age: {
+        type: Number,
+    },
+    gender: {
+        type: String,
+    },
+    phone: {
+        type: String,
+    },
+    points: {
+        type: Number,
     }
 })
 

@@ -13,7 +13,7 @@ export const POST = async (request) => {
             ...questionResponse
         })
         await newResponse.save();
-        
+
         return new Response(JSON.stringify(newResponse), { status: 201});
     } catch (error) {
         return new Response("Failed to save the response", { status: 500 });
