@@ -20,8 +20,8 @@ function getStatusClass(status) {
 
 const Steps = (props) => {
     useEffect(() => {
-      console.log(props.prevResponses);
-      console.log(props.responses.response);
+      //console.log(props.prevResponses);
+      //console.log(props.responses.response);
     }, [])
     
     return (

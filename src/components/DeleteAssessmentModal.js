@@ -19,11 +19,7 @@ const DeleteAssessment = ({ video, fetchVideos }) => {
         else
             console.error("error while deleting video");
 	}
-	
-    useEffect(() => {
-      console.log(video.title);
-    
-    }, [video])
+
     
 	return (
 		<>

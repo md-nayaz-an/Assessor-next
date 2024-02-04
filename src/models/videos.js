@@ -11,6 +11,10 @@ const VideoSchema = new Schema ({
     description: {
         type: String,
     },
+    adminid: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }
 })
 
 /*

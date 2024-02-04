@@ -1,13 +1,15 @@
 "use client";
 
-import { createResponseState } from '@recoil/atoms/responseAtom';
 import { updateResponseSelector } from '@recoil/selectors/updateResponseSelector';
+import { useSession } from 'next-auth/react';
 import React, { useState } from 'react'
 import { useEffect } from 'react';
 import { useRecoilCallback, useSetRecoilState } from 'recoil';
 
 const QuizComp = (props) => {
-    
+
+    const session = useSession();
+
     const [selected, setSelected] = useState(-1);
     const [probability, setProbability] = useState(-1);
     const [thoughts, setThoughts] = useState("");
@@ -27,7 +29,8 @@ const QuizComp = (props) => {
         }
 
         setResponse({
-            videoId: props.videoId, 
+            videoId: props.videoId,
+            userid: session?.data?.user?.id,
             questionId: props.question._id,
             updatedValues: updateValue
         });
@@ -46,7 +49,8 @@ const QuizComp = (props) => {
         }
 
         setResponse({
-            videoId: props.videoId, 
+            videoId: props.videoId,
+            userid: session?.data?.user?.id,
             questionId: props.question._id,
             updatedValues: updateValue
         });

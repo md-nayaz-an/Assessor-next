@@ -12,11 +12,17 @@ import { useRef } from 'react';
 
 import dynamic from 'next/dynamic';
 import mergeQuestionResponseForStepper from '@utils/mergeQuestionResponseForStepper';
+import { useSession } from 'next-auth/react';
 const VideoClient = dynamic(() => import("./VideoClient"), { ssr: false });
 
 const AssessmentIndividual = (props) => {
 
 	const router = useRouter();
+	const session = useSession();
+	useEffect(() => {
+	  	console.log(session);
+	}, [])
+	
 
 	const playerRef = useRef(null);
 	
@@ -28,11 +34,11 @@ const AssessmentIndividual = (props) => {
 
 	const [questions, setQuestions] = useState([]);
 
-  	const [responses, setResponses] = useRecoilState(createResponseState(props.videoId));
+  	const [responses, setResponses] = useRecoilState(createResponseState(props.videoId, session?.data?.user?.id));
 
 	const [prevResponses, setPrevResponses] = useState([]);
 	useEffect(() => {
-	  console.log(responses);
+		console.log(responses);
 	
 	}, [responses])
 
@@ -72,15 +78,11 @@ const AssessmentIndividual = (props) => {
 	}, [props])
 
 	const [start, setStart] = useState(false);
-  	
-	const [name, setName] = useState("");
-	const [mail, setMail] = useState("");
 
 	const onStartClick = () => {
 		const initialResponseState = {
 			videoId: props.videoId,
-			name,
-			mail,
+			userid: session.data.user.id,
 			response: questions.map(question => ({
 				questionid: question._id, 
 				options: [],
@@ -93,6 +95,8 @@ const AssessmentIndividual = (props) => {
 	  	setResponses(initialResponseState);
 	  	setStart(true);
 		setPlay(true);
+
+		console.log(responses);
 	}
 
 	const [current, setCurrent] = useState(-1);
@@ -108,9 +112,9 @@ const AssessmentIndividual = (props) => {
 		setShow(false);
 	}
 
+	const [submitLoader, setSubmitLoader] = useState(false);
 	const onSubmit = async () => {
-		console.log("submited");
-		
+		setSubmitLoader(true);
 		try {
 			const response = await fetch("/api/responses/new", {
 				method: "POST",
@@ -131,6 +135,8 @@ const AssessmentIndividual = (props) => {
 			}
 		} catch (error) {
 			console.error(error);
+		} finally {
+			setSubmitLoader(false);
 		}
 	}
 	
@@ -181,7 +187,10 @@ const AssessmentIndividual = (props) => {
 					
 					{
 						(start) ?
-							<button className='btn btn-primary self-end' onClick={onSubmit} disabled={current < responses.response.length}>End and Submit</button> :
+							<button className='btn btn-primary self-end' onClick={onSubmit} disabled={current < responses.response.length || submitLoader}>
+								{submitLoader && <span className="loading loading-spinner"></span>}
+								End and Submit
+							</button> :
 							<></>
 					}
 				</div>
@@ -227,24 +236,6 @@ const AssessmentIndividual = (props) => {
 					</div>:
 					<div className='p-4 flex-center w-full lg:w-1/2'>
 						<div className='w-full flex-center flex-col gap-2 self-center'>
-							<input
-								type="text"
-								placeholder="Name"
-								className="input input-bordered w-full max-w-xs" 	
-								value={name}
-								required
-								onChange={(e) => setName(e.target.value)}
-							/>
-
-							<input 
-								type="email"
-								placeholder="E-mail" 
-								className="input input-bordered w-full max-w-xs"
-								value={mail}
-								required
-								onChange={(e) => setMail(e.target.value)}
-							/>
-
 							<button className='btn btn-accent' onClick={onStartClick}>Start Assessment</button>
 						</div>
 					</div>

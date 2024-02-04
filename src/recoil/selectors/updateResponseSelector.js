@@ -3,8 +3,8 @@ import { selector } from 'recoil';
 
 export const updateResponseSelector = selector({
     key: 'updateResponseSelector', 
-    get: ({ get }) => async ({ videoId, questionId }) => {
-        const responseState = get(createResponseState(videoId));
+    get: ({ get }) => async ({ videoId, userid, questionId }) => {
+        const responseState = get(createResponseState(videoId, userid));
     
         // Find and return the specific response object based on questionId
         const response = responseState.response.find(
@@ -18,9 +18,9 @@ export const updateResponseSelector = selector({
             return { questionId, options: [], status: 0 };
         }
     },
-    set: ({ get, set }, { videoId, questionId, updatedValues }) => {
+    set: ({ get, set }, { videoId, userid, questionId, updatedValues }) => {
         // Get the current response state for the video
-        const responseState = get(createResponseState(videoId));
+        const responseState = get(createResponseState(videoId, userid));
 
         // Find the index of the response object with the matching questionId
         const responseIndex = responseState.response.findIndex(
@@ -39,7 +39,7 @@ export const updateResponseSelector = selector({
             newResponseArray[responseIndex] = updatedResponse;
             
             // Update the response state with the new response array
-            set(createResponseState(videoId), {
+            set(createResponseState(videoId, userid), {
                 ...responseState,
                 response: newResponseArray,
             });
