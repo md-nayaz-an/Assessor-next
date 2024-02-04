@@ -41,7 +41,7 @@ export const options = {
             clientSecret: process.env.GOOGLE_SECRET,
         })
     ],
-
+    secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
         async jwt({ token, user, trigger, session }) {
             if (trigger === "update" && session) {
