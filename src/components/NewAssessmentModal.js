@@ -45,7 +45,6 @@ const NewAssessment = ({ setVideos }) => {
 		}
 		
 		let modal = document.getElementById('my_modal_1');
-		console.log(modal);
 		modal.close();
 	}
 	

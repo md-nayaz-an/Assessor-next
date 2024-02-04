@@ -7,7 +7,6 @@ const Profile = () => {
             className='card w-full'
         >
             <ProfileDetailsInputModal />
-
         </div>
     )
 }

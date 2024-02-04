@@ -4,10 +4,20 @@ import { useSession } from 'next-auth/react';
 import React, { useEffect } from 'react'
 import { useState } from 'react';
 
-const ProfileDetailsInputModal = ({ setVideos }) => {
+const ProfileDetailsInputModal = () => {
 
+	
 	const session = useSession();
 	const { update } = useSession();
+	
+	useEffect(() => {
+		if(
+			!session.data?.userData?.age ||
+			!session.data?.userData?.gender ||
+			!session.data?.userData?.phone
+		)
+			document.getElementById('my_modal_1').showModal()
+	}, [session])
 
 	const [username, setUsername] = useState("");
 	const [gender, setGender] = useState("");
@@ -23,11 +33,6 @@ const ProfileDetailsInputModal = ({ setVideos }) => {
 
 	const onReset = () => {
 	}
-
-	useEffect(() => {
-		console.log(session);
-	}, [session])
-
 
 	const onSave = async () => {
 		try {
@@ -66,7 +71,8 @@ const ProfileDetailsInputModal = ({ setVideos }) => {
 			}
 			console.log(newSession);
 
-			await update(newSession)
+			await update(newSession);
+			document.getElementById('my_modal_1').close();
 		} catch (error) {
 			console.error("Error updating user data:", error);
 		}
@@ -83,7 +89,18 @@ const ProfileDetailsInputModal = ({ setVideos }) => {
 
 			<dialog id="my_modal_1" className="modal">
 				<div className="modal-box flex flex-col">
-					<h3 className="font-bold text-lg">Edit User Details</h3>
+					<h3 className="font-bold text-lg">
+						Edit User Details
+						{
+							(!session.data?.userData?.age ||
+							!session.data?.userData?.gender ||
+							!session.data?.userData?.phone) &&
+							(<>
+								<br />
+								<span className='text-error text-xs'>{"  Update all the details to continue"}</span>
+							</>)
+						}
+					</h3>
 					<div className="modal-action flex-start flex-col">
 						<div className="form-control w-full max-w-xs">
 							<label className="label">
@@ -163,7 +180,14 @@ const ProfileDetailsInputModal = ({ setVideos }) => {
 
 						<div className='my-8 px-4 w-full flex-center gap-4'>
 							<form method="dialog" className=' w-1/2'>
-								<button className="btn w-full">Discard</button>
+								<button 
+									className="btn w-full"
+									disabled={!session.data?.userData?.age ||
+												!session.data?.userData?.gender ||
+												!session.data?.userData?.phone}
+								>
+									Discard
+								</button>
 							</form>
 							<button
 								className="btn btn-primary w-1/2" 

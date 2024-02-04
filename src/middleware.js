@@ -15,6 +15,13 @@ export default withAuth(
 
         if(!path.startsWith("/client/") && path !== "/client" && token.userData?.role === "client")
             return NextResponse.redirect(new URL("/client", req.url));
+
+        if(token.userData?.role === "client" && (
+            !token.userData?.age ||
+            !token.userData?.gender ||
+            !token.userData?.phone
+        ))
+            return NextResponse.redirect(new URL("/client/profile", req.url))
     },
     {
         callbacks: {
