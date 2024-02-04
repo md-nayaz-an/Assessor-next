@@ -122,17 +122,22 @@ const ClientNav = () => {
                                     </li>
                                 ))
                             }
-                            <li>
-                                {
-                                    session ?
-                                    <Link href="/api/auth/signout?callbackUrl=/">
-                                        Logout
-                                    </Link> :
+                            {
+                                session ?
+                                    profilemenu.map((item, key) => (
+                                        <li key={key + menu.length}>
+                                            <Link href={item.url}>
+                                                {item.name}
+                                            </Link>
+                                        </li>
+                                    ))
+                                :
+                                <li>
                                     <Link href="/api/auth/signin">
                                         Login
                                     </Link>
-                                }
-                            </li>
+                                </li>
+                            }
                         </ul>
                     </div>
                 </div>
