@@ -10,9 +10,9 @@ import { useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 
 const AdminQuestionList = (props) => {
-    
+
     const [checked, setChecked] = useState(-1);
-    
+
 
     const setNewQuestion = useSetRecoilState(appendQuestionDataSelector);
     const updateQuestion = useSetRecoilState(updateQuestionDataSelector);
@@ -139,6 +139,11 @@ export const ListComp = (props) => {
 
     const [question, setQuestion] = useState(props.question);
     const [options, setOptions] = useState(props.question.options);
+    const [correct, setCorrect] = useState(-1);
+
+    useEffect(() => {
+        console.log(options);
+    }, [options])
 
     const update = () => {
         props.updateQuestion({
@@ -247,6 +252,8 @@ export const ListComp = (props) => {
                                 setOptions={setOptions}
                                 key={index}
                                 cloud={props.cloud}
+                                correct={correct}
+                                setCorrect={setCorrect}
                             />
                         ))
                     }
@@ -339,18 +346,16 @@ const ListOptions = (props) => {
                     disabled={props.cloud}
                 />
                 <input 
-                    type="checkbox" 
+                    type="radio" 
                     checked={props.option.isCorrect}
-                    className="checkbox"
+                    name='radio-1'
+                    className="radio"
                     onChange={() => {
-                        props.setOptions(prevOptions => [
-                            ...prevOptions.slice(0, props.index),
-                            {
-                                ...prevOptions[props.index],
-                                isCorrect: !prevOptions[props.index].isCorrect
-                            },
-                            ...prevOptions.slice(props.index + 1)
-                        ]);
+                        props.setCorrect(props.index);
+                        props.setOptions(prevOptions => prevOptions.map((option, index) => ({
+                            ...option,
+                            isCorrect: index === props.correct
+                        })));
                     }}
                     disabled={props.cloud}
                 />
