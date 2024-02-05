@@ -1,7 +1,11 @@
+import { useSession } from 'next-auth/react';
 import React from 'react'
 import ReactPlayer from 'react-player';
 
 const VideoClient = (props) => {
+
+    const session = useSession();
+
     return (
         <ReactPlayer
             ref={props.playerRef}
@@ -14,7 +18,7 @@ const VideoClient = (props) => {
             onPlay={() => props.setPlay(true)}
             onPause={() => props.setPlay(false)}
             onProgress={(e) => props.setVideoProgress(e)}
-            controls={props.admin}
+            controls={session?.data?.userData?.role === "admin"}
         />
     )
 }
