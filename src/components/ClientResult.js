@@ -62,10 +62,6 @@ const ClientResult = (props) => {
 		console.log(curr)
 	}, [responses])
 
-	useEffect(() => {
-		console.log(result);
-	}, [result])
-
   	return (
 		<section className='w-full flex-center flex-col'>
 			<div className=' flex-start flex-col self-start mt-4'>

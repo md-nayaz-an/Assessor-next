@@ -20,8 +20,8 @@ const AssessmentIndividual = (props) => {
 	const router = useRouter();
 	const session = useSession();
 	useEffect(() => {
-	  	console.log(session);
-	}, [])
+	  	console.log(props.responses);
+	}, [props.responses])
 	
 
 	const playerRef = useRef(null);
@@ -64,17 +64,22 @@ const AssessmentIndividual = (props) => {
 		//console.log(data);
 	}
 	
-	useEffect(async () => {
+	useEffect(() => {
 		if(props.videoId) {
-			await fetchVideoDetails();
-			await fetchQuestions();
-			await fetchPrevResponses();
+			fetchVideoDetails();
+			fetchQuestions();
+			fetchPrevResponses();
 		}
 	}, [props.videoId])
 
 	const [start, setStart] = useState(false);
 
-	const onStartClick = () => {
+	const onStartClick = async() => {
+
+		if(questions.length === 0)
+			await fetchQuestions();
+	
+		console.log(questions);
 		const initialResponseState = {
 			videoId: props.videoId,
 			userid: props.userId,
@@ -117,17 +122,13 @@ const AssessmentIndividual = (props) => {
 			})
 			.then(res => res.json())
 			.then(data => {
+				console.log(data);
 				router.push("/client/responses/" + data._id + "/" + props.videoId);
 			})
 			.catch(err => {
 				console.error(err);
 			});
 
-			if(response.ok) {
-				const data = response.json();
-				console.log(data._id);
-				
-			}
 		} catch (error) {
 			console.error(error);
 		} finally {
