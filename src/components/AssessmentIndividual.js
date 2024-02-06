@@ -34,7 +34,6 @@ const AssessmentIndividual = (props) => {
 
 	const [questions, setQuestions] = useState([]);
 
-  	const [responses, setResponses] = useRecoilState(createResponseState(props.videoId));
 
 	const [prevResponses, setPrevResponses] = useState([]);
 
@@ -65,11 +64,11 @@ const AssessmentIndividual = (props) => {
 		//console.log(data);
 	}
 	
-	useEffect(() => {
+	useEffect(async () => {
 		if(props.videoId) {
-			fetchVideoDetails();
-			fetchQuestions();
-			fetchPrevResponses();
+			await fetchVideoDetails();
+			await fetchQuestions();
+			await fetchPrevResponses();
 		}
 	}, [props.videoId])
 
@@ -88,11 +87,11 @@ const AssessmentIndividual = (props) => {
 		};
 
 		setCurrent(0);
-	  	setResponses(initialResponseState);
+	  	props.setResponses(initialResponseState);
 	  	setStart(true);
 		setPlay(true);
 
-		console.log(responses);
+		console.log(props.responses);
 	}
 
 	const [current, setCurrent] = useState(-1);
@@ -114,7 +113,7 @@ const AssessmentIndividual = (props) => {
 		try {
 			const response = await fetch("/api/responses/new", {
 				method: "POST",
-				body: JSON.stringify(responses),
+				body: JSON.stringify(props.responses),
 			})
 			.then(res => res.json())
 			.then(data => {
@@ -167,7 +166,21 @@ const AssessmentIndividual = (props) => {
 							play={play}
 							setPlay={setPlay}
 						/>
-
+						{
+							session?.data?.userData?.role !== "admin" &&
+						<><div 
+							className={`absolute top-0 p-4 w-full h-1/5 bg-base-100 opacity-96 overflow-auto text-lg text-accent-focus
+								${(!play) ? '': 'invisible'}
+								transition-all ease-out delay-[5000ms]
+							`}
+						/>
+						<div 
+							className={`absolute bottom-0 p-4 w-full h-1/5 bg-base-100 opacity-96 overflow-auto text-lg text-accent-focus
+								${(!play) ? '': 'invisible'}
+								transition-all ease-in-out delay-[5000ms]
+							`}
+						/></>
+						}
 						<div 
 							className={`absolute bottom-0 p-4 w-full h-2/4 bg-neutral-focus opacity-96 rounded-t-xl overflow-auto text-lg text-accent-focus
 								${(show) ? '': 'invisible'} 
@@ -183,7 +196,7 @@ const AssessmentIndividual = (props) => {
 					
 					{
 						(start) ?
-							<button className='btn btn-primary self-end' onClick={onSubmit} disabled={current < responses.response.length || submitLoader}>
+							<button className='btn btn-primary self-end' onClick={onSubmit} disabled={current < props.responses.response.length || submitLoader}>
 								{submitLoader && <span className="loading loading-spinner"></span>}
 								End and Submit
 							</button> :
@@ -195,7 +208,7 @@ const AssessmentIndividual = (props) => {
 					start ?
 					<div className='lg:p-4 w-full lg:w-1/2 flex-center flex-col gap-2'>
 						<Steps 
-							responses={responses}
+							responses={props.responses}
 							current={current}
 							prevResponses={mergeQuestionResponseForStepper(questions, prevResponses)}
 						/>
