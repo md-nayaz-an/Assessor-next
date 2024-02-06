@@ -23,6 +23,9 @@ const QuestionSchema = new Schema ({
     },
     summary: {
         type: String,
+    },
+    bets: {
+        type: Array,
     }
 })
 

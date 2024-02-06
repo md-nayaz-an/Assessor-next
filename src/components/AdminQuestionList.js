@@ -1,6 +1,5 @@
 'use client';
 
-import { createQuestionState } from '@recoil/atoms/questionsAtom';
 import { appendQuestionDataSelector } from '@recoil/selectors/appendQuestionDataSelector';
 import { deleteQuestionDataSelector } from '@recoil/selectors/deleteQuestionDataSelector';
 import { updateQuestionDataSelector } from '@recoil/selectors/updateQuestionDataSelector';
@@ -30,10 +29,16 @@ const AdminQuestionList = (props) => {
                 question:"",
                 options: [],
                 sliderquestion: "",
+                bet: [],
             }
         })
     }
 
+    useEffect(() => {
+      console.log(props.localQuestions);
+    
+    }, [props.localQuestions])
+    
     return (
         <>
             <div className='max-h-80 w-full overflow-auto'>
@@ -54,8 +59,6 @@ const AdminQuestionList = (props) => {
                             />
                         ))
                     }
-
-                    
 
                     {
                         props.cloudQuestions.map((question, index) => (
@@ -139,11 +142,12 @@ export const ListComp = (props) => {
 
     const [question, setQuestion] = useState(props.question);
     const [options, setOptions] = useState(props.question.options);
+    const [bets, setBets] = useState(props.question.bets || []);
     const [correct, setCorrect] = useState(-1);
 
     useEffect(() => {
-        console.log(options);
-    }, [options])
+        console.log(question);
+    }, [question])
 
     const update = () => {
         props.updateQuestion({
@@ -194,7 +198,7 @@ export const ListComp = (props) => {
                 </div>
                 
             </div>
-            <div className="collapse-content max-h-fit">     
+            <div className="collapse-content max-h-fit">
                 <div className="form-control w-full">
                     <label className="label">
                         <span className="label-text">Title</span>
@@ -291,6 +295,29 @@ export const ListComp = (props) => {
                         
                         disabled={props.cloud}
                     />
+
+                    {
+                        bets?.map((bet, index) => (
+                            <></>
+                        ))
+                    }
+                    {
+                        !props.cloud &&
+
+                        <button
+                            className='btn btn-circle btn-secondary m-4 w-1/3'
+                            onClick={() =>
+                                setBets(prevBets => ([
+                                        ...prevBets,
+                                        {}
+                                ]))}
+                        >
+                            Add Bet
+                        </button>
+
+                    }
+                
+
                 </div>
 
                 {

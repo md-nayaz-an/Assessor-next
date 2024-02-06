@@ -87,7 +87,7 @@ const AdminAssessmentIndividual = (props) => {
 	}
 	
 	useEffect(() => {
-		console.log(cloudQuestions);
+		//console.log(cloudQuestions);
 	}, [cloudQuestions]);
 	
 	return (

@@ -50,11 +50,11 @@ const ResponseTable = () => {
                 <table className="table">
                     <thead>
                     <tr>
-                        <th></th>
+                        <th>{" "}</th>
                         <th>Name</th>
                         <th>Assessment Title</th>
                         <th>Attempted on</th>
-                        <th></th>
+                        <th>{" "}</th>
                     </tr>
                     </thead>
                     <tbody

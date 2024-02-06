@@ -8,7 +8,13 @@ export default withAuth(
         const path = req.nextUrl.pathname;
         const token = req.nextauth.token;
 
+        console.log("token");
         console.log(token);
+
+        if(path.startsWith('/api')) {
+            console.log(path);
+            return;
+        }
 
         if(path.startsWith('/admin') && token.userData?.role !== "admin")
             return NextResponse.redirect(new URL('/client', req.url));
@@ -30,4 +36,4 @@ export default withAuth(
     }
 )
 
-export const config = { matcher: ["/admin", "/client"] };
+export const config = { matcher: ["/admin", "/client", "/api"] };

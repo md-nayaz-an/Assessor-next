@@ -34,13 +34,9 @@ const AssessmentIndividual = (props) => {
 
 	const [questions, setQuestions] = useState([]);
 
-  	const [responses, setResponses] = useRecoilState(createResponseState(props.videoId, session?.data?.user?.id));
+  	const [responses, setResponses] = useRecoilState(createResponseState(props.videoId));
 
 	const [prevResponses, setPrevResponses] = useState([]);
-	useEffect(() => {
-		console.log(responses);
-	
-	}, [responses])
 
 	const fetchVideoDetails = async () => {
 		const res = await fetch('/api/videos/' + props.videoId, {
@@ -75,14 +71,14 @@ const AssessmentIndividual = (props) => {
 			fetchQuestions();
 			fetchPrevResponses();
 		}
-	}, [props])
+	}, [props.videoId])
 
 	const [start, setStart] = useState(false);
 
 	const onStartClick = () => {
 		const initialResponseState = {
 			videoId: props.videoId,
-			userid: session.data.user.id,
+			userid: props.userId,
 			response: questions.map(question => ({
 				questionid: question._id, 
 				options: [],
