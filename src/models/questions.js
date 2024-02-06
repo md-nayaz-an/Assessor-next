@@ -24,9 +24,6 @@ const QuestionSchema = new Schema ({
     summary: {
         type: String,
     },
-    bets: {
-        type: Array,
-    }
 })
 
 const Questions = models.Questions || model('Questions', QuestionSchema);

@@ -29,16 +29,10 @@ const AdminQuestionList = (props) => {
                 question:"",
                 options: [],
                 sliderquestion: "",
-                bet: [],
             }
         })
     }
 
-    useEffect(() => {
-      console.log(props.localQuestions);
-    
-    }, [props.localQuestions])
-    
     return (
         <>
             <div className='max-h-80 w-full overflow-auto'>
@@ -142,12 +136,18 @@ export const ListComp = (props) => {
 
     const [question, setQuestion] = useState(props.question);
     const [options, setOptions] = useState(props.question.options);
-    const [bets, setBets] = useState(props.question.bets || []);
     const [correct, setCorrect] = useState(-1);
 
     useEffect(() => {
         console.log(question);
     }, [question])
+
+    useEffect(() => {
+        console.log(correct);
+    }, [correct])
+    useEffect(() => {
+        console.log(options);
+    }, [options])
 
     const update = () => {
         props.updateQuestion({
@@ -296,28 +296,6 @@ export const ListComp = (props) => {
                         disabled={props.cloud}
                     />
 
-                    {
-                        bets?.map((bet, index) => (
-                            <></>
-                        ))
-                    }
-                    {
-                        !props.cloud &&
-
-                        <button
-                            className='btn btn-circle btn-secondary m-4 w-1/3'
-                            onClick={() =>
-                                setBets(prevBets => ([
-                                        ...prevBets,
-                                        {}
-                                ]))}
-                        >
-                            Add Bet
-                        </button>
-
-                    }
-                
-
                 </div>
 
                 {
@@ -374,7 +352,7 @@ const ListOptions = (props) => {
                 />
                 <input 
                     type="radio" 
-                    checked={props.option.isCorrect}
+                    checked={props.index === props.correct}
                     name='radio-1'
                     className="radio"
                     onChange={() => {
