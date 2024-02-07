@@ -1,15 +1,14 @@
 import { withAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server";
 
-// TODO build more secure workflow using switch
 export default withAuth(
     async function middleware(req) {
         
         const path = req.nextUrl.pathname;
         const token = req.nextauth.token;
-
+        
+        console.log(path);
         if(path.startsWith('/api')) {
-            console.log(path);
             return;
         }
 
@@ -32,5 +31,5 @@ export default withAuth(
         },
     }
 )
-
-export const config = { matcher: ["/"] };
+//65bfb0655973fb8a9e963a5b
+export const config = { matcher: ["/", "/admin", "/client", "/api"] };
