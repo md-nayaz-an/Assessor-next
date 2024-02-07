@@ -10,8 +10,7 @@ const VideoClient = (props) => {
     return (
         <ReactPlayer
             ref={props.playerRef}
-            className={`${(session?.data?.userData?.role === "admin") ? "" : "pointer-events-none"}`}
-
+            className={`${(session?.data?.userData?.role === "admin") ? " pointer-events-auto" : "pointer-events-none"}`}
             width={"100%"}
             height={"100%"}
             url={props.url}

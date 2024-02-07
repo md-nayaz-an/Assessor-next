@@ -125,6 +125,7 @@ const AdminAssessmentIndividual = (props) => {
 						cloudQuestions={cloudQuestions}
 						onSeekForward={onSeekForward}
 						onSeekBackward={onSeekBackward}
+						totalDuration={playerRef.current?.getDuration()}
 					/>
 				</div>
 			</div>

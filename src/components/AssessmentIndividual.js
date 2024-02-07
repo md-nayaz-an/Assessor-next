@@ -171,19 +171,17 @@ const AssessmentIndividual = (props) => {
 							session?.data?.userData?.role !== "admin" &&
 						<><div 
 							className={`absolute top-0 p-4 w-full h-1/5 bg-base-100 opacity-96 overflow-auto text-lg text-accent-focus
-								${(!play) ? '': 'invisible'}
-								transition-all ease-out delay-[5000ms]
+								${(!play) ? '': 'invisible transition-all ease-out delay-[5000ms]'}
 							`}
 						/>
 						<div 
 							className={`absolute bottom-0 p-4 w-full h-1/5 bg-base-100 opacity-96 overflow-auto text-lg text-accent-focus
-								${(!play) ? '': 'invisible'}
-								transition-all ease-in-out delay-[5000ms]
+								${(!play) ? '': 'invisible transition-all ease-out delay-[5000ms]'}
 							`}
 						/></>
 						}
 						<div 
-							className={`absolute bottom-0 p-4 w-full h-2/4 bg-neutral-focus opacity-96 rounded-t-xl overflow-auto text-lg text-accent-focus
+							className={`absolute z-50 bottom-0 p-4 w-full h-2/4 bg-neutral-focus opacity-96 rounded-t-xl overflow-auto text-lg text-accent-focus
 								${(show) ? '': 'invisible'} 
 								hover:h-3/4 
 								transition-all ease-in-out delay-150
