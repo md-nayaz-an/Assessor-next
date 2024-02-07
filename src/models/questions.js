@@ -24,7 +24,7 @@ const QuestionSchema = new Schema ({
     summary: {
         type: String,
     },
-    bets: {
+    followUps: {
         type: Array,
     }
 })
