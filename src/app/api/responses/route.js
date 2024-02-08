@@ -11,6 +11,7 @@ export const GET = async (request) => {
         const responses = await Responses.find({})
             .populate('videoid')
             .populate('response.questionid')
+            .populate('userid')
             .sort({ timestamp: -1 });
 
         return new Response(JSON.stringify(responses), { status: 200});

@@ -30,6 +30,7 @@ const ResponseTable = () => {
 
         const data = await res.json();
         setResponses(data);
+        console.log(data);
     }
 
     useEffect(() => {
@@ -63,15 +64,15 @@ const ResponseTable = () => {
                         {
                             responses.map((response, index) => (
                                 <tr>
-                                    <th>{index}</th>
+                                    <th>{index + 1}</th>
                                     <td>
                                         <div
                                             className='flex flex-col gap-1'
                                         >
-                                            <span className='mx-2'>{response.name}</span>
+                                            <span className='mx-2'>{response.name || response.userid?.name}</span>
                                             {
-                                                response.mail && 
-                                                <span className='badge text-xs'>{response.mail}</span>
+                                                (response.mail || response.userid?.email) && 
+                                                <span className='badge text-xs'>{response.mail || response.userid?.email}</span>
                                             }
                                         </div>
                                     </td>
@@ -92,18 +93,14 @@ const ResponseTable = () => {
                                         </div>
                                     </td>
                                     <td>{new Date(response.timestamp).toLocaleString()}</td>
-                                    
+
                                     <td>
                                         <button 
                                             className='btn btn-link'
-                                            onClick={() => {
-                                                router.push(`/admin/responses/${response._id}?`)
-                                            }}
-                                        >
-                                            Explore
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 1024 1024">
-                                                <path d="M364.8 106.666667L298.666667 172.8 637.866667 512 298.666667 851.2l66.133333 66.133333L768 512z"/>
-                                            </svg>
+                                        >   
+                                            <Link href={`/admin/responses/${response._id}/${response.videoid?._id}`} target="_blank">
+                                                Explore
+                                            </Link>
                                         </button>
                                     </td>
                                 </tr>

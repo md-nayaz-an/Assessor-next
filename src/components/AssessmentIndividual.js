@@ -128,7 +128,15 @@ const AssessmentIndividual = (props) => {
 			})
 			.then(res => res.json())
 			.then(data => {
-				console.log(data);
+				session.update({
+					...session.data,
+					userData: {
+						...session.data.userData,
+						points: data.userUpdate.points
+					}
+				});
+				return data;
+			}).then(data => {
 				router.push("/client/responses/" + data._id + "/" + props.videoId);
 			})
 			.catch(err => {

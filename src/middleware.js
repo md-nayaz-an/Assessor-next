@@ -3,10 +3,10 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
     async function middleware(req) {
-        
+
         const path = req.nextUrl.pathname;
         const token = req.nextauth.token;
-        
+
         if(path.startsWith('/api')) {
             console.log(path);
             return;

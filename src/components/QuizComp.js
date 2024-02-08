@@ -56,13 +56,14 @@ const QuizComp = (props) => {
     }
 
     const onSkip = () => {
-        console.log(props.videoId);
-        console.log(props.question._id);
-        console.log([selected]);
+        let prevOptions = [...responseOptions];
+
+        if(prevOptions.length !== 0 && props.question.type === "revise")
+            prevOptions.push(-1);
+
 
         const updateValue = {
-            status: 1,
-            options: []
+            options: prevOptions,
         }
 
         setResponse({
@@ -146,7 +147,7 @@ const QuizComp = (props) => {
 
             <div className='w-full flex-wrap flex justify-between gap-2 lg:-order-1'>
                 <button 
-                    className='btn w-2/5 lg:w-1/6 lg:-order-1'
+                    className='btn w-2/6 lg:w-1/6 lg:-order-1'
                     onClick={() => {
                         setSelected(-1);
                         setProbability(-1);
@@ -154,8 +155,17 @@ const QuizComp = (props) => {
                 >
                     Reset
                 </button>
+                {
+                    props.question.type === "revise" && 
+                    <button
+                        className='btn btn-neutral w-1/5 lg:w-1/6'
+                        onClick={onSkip}
+                    >
+                        Skip
+                    </button>
+                }
                 <button 
-                    className='btn btn-accent w-2/5 lg:w-1/6'
+                    className='btn btn-accent w-2/6 lg:w-1/6'
                     onClick={onSave}
                     disabled={selected === -1 || probability === -1 || thoughts === ""}
                 >
