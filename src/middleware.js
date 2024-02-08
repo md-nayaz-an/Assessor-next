@@ -7,8 +7,8 @@ export default withAuth(
         const path = req.nextUrl.pathname;
         const token = req.nextauth.token;
         
-        console.log(path);
         if(path.startsWith('/api')) {
+            console.log(path);
             return;
         }
 
@@ -32,4 +32,4 @@ export default withAuth(
     }
 )
 //65bfb0655973fb8a9e963a5b
-export const config = { matcher: ["/", "/admin", "/client", "/api"] };
+export const config = { matcher: ["/", "/admin/:path*", "/client", "/api/:path*"] };

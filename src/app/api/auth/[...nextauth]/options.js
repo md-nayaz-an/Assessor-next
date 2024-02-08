@@ -19,11 +19,12 @@ export const options = {
                             name: profile.name,
                             image: profile.picture,
                             role: "client",
+                            points: 200,
                         })
                         console.log("User created");
                     }
 
-                    console.log(user);
+                    //console.log(user);
 
                     return {
                         id: user.id,

@@ -8,7 +8,7 @@ const ClientNav = () => {
     const session = useSession();
 
     useEffect(() => {
-        console.log(session);
+        //console.log(session);
     }, [session])
     
     const menu = [

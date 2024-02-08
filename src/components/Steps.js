@@ -33,9 +33,9 @@ const Steps = (props) => {
                             key={index}
                             className={`step ${
                                 getStatusClass(response.status)
-                            } ${
-                                (index == props.current) ? 'after:border' : ''
-                            } step-${index}`}
+                            } 
+                            {//${(index == props.current) ? 'after:border' : ''}}
+                            step-${index}`}
                       >
                       {
                         (response.status >= 2) &&

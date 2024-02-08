@@ -5,7 +5,7 @@ const mergeQuestionResponseForStepper = (questions, responses) => {
   return questions.map(question => {
     const res = responses
                 .filter((response) => response.questionid === question._id)
-                .flatMap(r => r.options)
+                .flatMap(r => r.options[0] || 0)
                 .reduce((accumulator, currentValue) => {
                   accumulator[currentValue] = (accumulator[currentValue] || 0) + 1;
                   return accumulator;

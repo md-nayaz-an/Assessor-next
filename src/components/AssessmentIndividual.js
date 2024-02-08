@@ -13,12 +13,15 @@ import { useRef } from 'react';
 import dynamic from 'next/dynamic';
 import mergeQuestionResponseForStepper from '@utils/mergeQuestionResponseForStepper';
 import { useSession } from 'next-auth/react';
+import { questionListTransform } from '@utils/questionListTransform';
+import QuizBetComp from './QuizBetComp';
 const VideoClient = dynamic(() => import("./VideoClient"), { ssr: false });
 
 const AssessmentIndividual = (props) => {
 
 	const router = useRouter();
 	const session = useSession();
+
 	useEffect(() => {
 	  	console.log(props.responses);
 	}, [props.responses])
@@ -32,6 +35,7 @@ const AssessmentIndividual = (props) => {
 		url: "",
 	});
 
+	const [rawQuestions, setRawQuestions] = useState([]);
 	const [questions, setQuestions] = useState([]);
 
 
@@ -60,8 +64,11 @@ const AssessmentIndividual = (props) => {
             cache: 'no-store'
         });
 		const data = await res.json();
-		setQuestions(data);
+		setRawQuestions(data);
 		//console.log(data);
+		
+		let questionProcessed = await questionListTransform(data);
+		setQuestions(questionProcessed);
 	}
 	
 	useEffect(() => {
@@ -76,14 +83,13 @@ const AssessmentIndividual = (props) => {
 
 	const onStartClick = async() => {
 
-		if(questions.length === 0)
+		if(rawQuestions.length === 0)
 			await fetchQuestions();
-	
-		console.log(questions);
+
 		const initialResponseState = {
 			videoId: props.videoId,
 			userid: props.userId,
-			response: questions.map(question => ({
+			response: rawQuestions.map(question => ({
 				questionid: question._id, 
 				options: [],
 				status: 0,
@@ -166,6 +172,7 @@ const AssessmentIndividual = (props) => {
 							setVideoProgress={setVideoProgress}
 							play={play}
 							setPlay={setPlay}
+							className={`${(session?.data?.userData?.role === "admin") ? " pointer-events-auto" : "pointer-events-none"}`}
 						/>
 						{
 							session?.data?.userData?.role !== "admin" &&
@@ -195,7 +202,11 @@ const AssessmentIndividual = (props) => {
 					
 					{
 						(start) ?
-							<button className='btn btn-primary self-end' onClick={onSubmit} disabled={current < props.responses.response.length || submitLoader}>
+							<button 
+								className='btn btn-primary self-end' 
+								onClick={onSubmit} 
+								disabled={current < questions.length || submitLoader}
+							>
 								{submitLoader && <span className="loading loading-spinner"></span>}
 								End and Submit
 							</button> :
@@ -209,18 +220,27 @@ const AssessmentIndividual = (props) => {
 						<Steps 
 							responses={props.responses}
 							current={current}
-							prevResponses={mergeQuestionResponseForStepper(questions, prevResponses)}
+							prevResponses={mergeQuestionResponseForStepper(rawQuestions, prevResponses)}
 						/>
 
 						<div className='w-full rounded-lg'>
 							{
-								(show) ?
-								<QuizComp
-									videoId={props.videoId}
-									question={questions[current]}
-									onNext={onNext}
-									show={show}
-								/> :
+								(show) ? 
+									(questions[current].type === "bet") ?
+										<QuizBetComp
+											videoId={props.videoId}
+											question={questions[current]}
+											onNext={onNext}
+											show={show}
+										/>
+										:
+										<QuizComp
+											videoId={props.videoId}
+											question={questions[current]}
+											onNext={onNext}
+											show={show}
+										/>
+								:
 						        <div className='pb-48 w-full flex-center flex-col relative lg:pb-20 min-h-[6rem]'>
 									{
 										(current >= 0 && current < questions.length) &&
@@ -244,7 +264,14 @@ const AssessmentIndividual = (props) => {
 					</div>:
 					<div className='p-4 flex-center w-full lg:w-1/2'>
 						<div className='w-full flex-center flex-col gap-2 self-center'>
-							<button className='btn btn-accent' onClick={onStartClick}>Start Assessment</button>
+							<button 
+								className='btn btn-accent' 
+								onClick={onStartClick}
+								disabled={questions.length === 0}
+							>
+								{questions.length === 0 && <span className="loading loading-spinner"></span>}
+								Start Assessment
+							</button>
 						</div>
 					</div>
 				}
