@@ -86,7 +86,7 @@ const ClientResult = (props) => {
 							>
 								<div className='w-full flex flex-col gap-2 mt-8'>
 									{
-										res.options.map((op, i) => (
+										res.options?.map((op, i) => (
 											<div 
 												className={`flex justify-between rounded-md p-1 outline 
 													${(questions[idx].options[i].isCorrect) ?
@@ -97,7 +97,7 @@ const ClientResult = (props) => {
 											>
 												{op.option}
 												{
-													(curr.response[idx].options[0] === i) &&
+													(curr.response[idx]?.options[0] === i) &&
 													<span className='text-xs self-end'>
 														<i>
 															your choice
@@ -111,8 +111,8 @@ const ClientResult = (props) => {
 									<div
 										className='mt-8'
 									>
-										{ `Your selection, "${result[idx].options[curr.response[idx].options[0]].option}" was chosen by 
-											${(( result[idx].options[curr.response[idx].options[0]].count / result[idx].options.reduce((acc, d) => acc + d.count, 0)) * 100).toFixed(2)}%` 
+										{ `Your selection, "${result[idx].options[curr.response[idx]?.options[0]]?.option}" was chosen by 
+											${(( result[idx].options[curr.response[idx]?.options[0]]?.count / result[idx].options.reduce((acc, d) => acc + d.count, 0)) * 100).toFixed(2)}%` 
 										}
 									</div>
 								</div>
@@ -121,29 +121,29 @@ const ClientResult = (props) => {
 									className='p-4'
 								>
 									{
-										console.log(res.options.map((r, i) => {
+										console.log(res.options?.map((r, i) => {
 											return {
 												x: r.option,
 												y: r.count,
 												color: (questions[idx].options[i].isCorrect) ? '#00CDB8' :
-														(curr.response[idx].options[0] === i) ? '#A6ADBB' : ""
+														(curr.response[idx]?.options[0] === i) ? '#A6ADBB' : ""
 											}
 										}))
 									}
 									<VictoryPie
-										data={res.options.map((r, i) => {
+										data={res.options?.map((r, i) => {
 											return {
 												x: r.option,
 												y: r.count,
 												color: (questions[idx].options[i].isCorrect) ? '#00CDB8' :
-														(curr.response[idx].options[0] === i) ? '#A6ADBB' : ""
+														(curr.response[idx]?.options[0] === i) ? '#A6ADBB' : ""
 											}
 										})}
 
 										labelComponent={<CustomLabel />}
 										colorScale={res.options.map((r, i) => {
 											return (questions[idx].options[i].isCorrect) ? '#00CDB8' :
-														(curr.response[idx].options[0] === i) ? '#A6ADBB' : ""
+														(curr.response[idx]?.options[0] === i) ? '#A6ADBB' : ""
 										})}
 
 										innerRadius={({ datum }) => (datum.color === "#A6ADBB") ? 110 : 100}
