@@ -8,7 +8,7 @@ export default withAuth(
         const token = req.nextauth.token;
 
         if(path.startsWith('/api')) {
-            console.log(path);
+            //console.log(path);
             return;
         }
 
