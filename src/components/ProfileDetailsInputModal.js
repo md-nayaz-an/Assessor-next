@@ -14,13 +14,15 @@ const ProfileDetailsInputModal = () => {
 		if(
 			!session.data?.userData?.age ||
 			!session.data?.userData?.gender ||
-			!session.data?.userData?.phone
+			!session.data?.userData?.phone ||
+			!session.data?.userData?.usn
 		)
 			document.getElementById('my_modal_1').showModal()
 	}, [session])
 
 	const [username, setUsername] = useState("");
 	const [gender, setGender] = useState("");
+	const [usn, setUsn] = useState("");
 	const [age, setAge] = useState(21);
 	const [phone, setPhone] = useState("+91");
 
@@ -47,8 +49,11 @@ const ProfileDetailsInputModal = () => {
 			if (age !== session?.data?.userData?.age) {
 				updateData.age = age;
 			}
-			if (age !== session?.data?.userData?.phone) {
+			if (phone !== session?.data?.userData?.phone) {
 				updateData.phone = phone;
+			}
+			if (usn !== session?.data?.userData?.usn) {
+				updateData.usn = usn;
 			}
 
 			const response = await fetch(`/api/user/update/${session?.data?.user?.id}`, {
@@ -94,7 +99,8 @@ const ProfileDetailsInputModal = () => {
 						{
 							(!session.data?.userData?.age ||
 							!session.data?.userData?.gender ||
-							!session.data?.userData?.phone) &&
+							!session.data?.userData?.phone ||
+							!session.data?.userData?.usn) &&
 							(<>
 								<br />
 								<span className='text-error text-xs'>{"  Update all the details to continue"}</span>
@@ -176,6 +182,16 @@ const ProfileDetailsInputModal = () => {
 									<span className="label-text-alt text-error"> {"13 < age < 120"}</span>
 								</div>
 							}
+							<label className="label mt-4">
+								<span className="label-text">USN/SRN</span>
+							</label>
+							<input 
+								type="text" 
+								placeholder="Enter USN/SRN" 
+								className="input input-bordered w-full max-w-xs" 
+								onChange={(e) => setUsn(e.target.value)}
+								value={usn}
+							/>
 						</div>
 
 						<div className='my-8 px-4 w-full flex-center gap-4'>
@@ -184,7 +200,8 @@ const ProfileDetailsInputModal = () => {
 									className="btn w-full"
 									disabled={!session.data?.userData?.age ||
 												!session.data?.userData?.gender ||
-												!session.data?.userData?.phone}
+												!session.data?.userData?.phone ||
+												!session.data?.userData?.usn}
 								>
 									Discard
 								</button>
@@ -196,6 +213,7 @@ const ProfileDetailsInputModal = () => {
 								disabled={
 									(age < 14 || age >= 120)
 									|| !(/^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/.test(phone))
+									|| usn.length < 2
 								}
 							>
 								Save

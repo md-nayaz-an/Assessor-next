@@ -21,7 +21,8 @@ export default withAuth(
         if(token.userData?.role === "client" && (
             !token.userData?.age ||
             !token.userData?.gender ||
-            !token.userData?.phone
+            !token.userData?.phone ||
+            !token.userData?.usn
         ))
             return NextResponse.redirect(new URL("/client/profile", req.url))
     },

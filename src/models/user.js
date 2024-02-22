@@ -22,6 +22,9 @@ const UserSchema = new Schema ({
     phone: {
         type: String,
     },
+    usn: {
+        type: String,
+    },
     points: {
         type: Number,
     }
