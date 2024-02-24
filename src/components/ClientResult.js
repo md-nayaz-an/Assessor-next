@@ -1,6 +1,6 @@
 "use client";
 
-import mergeQuestionResponseForStepper from '@utils/mergeQuestionResponseForStepper';
+import mergeQuestionResponse from '@utils/mergeQuestionResponse';
 import React from 'react'
 import { useEffect } from 'react';
 import { useState } from 'react';
@@ -54,13 +54,24 @@ const ClientResult = (props) => {
 	const [result, setResult] = useState([]);
 	const [curr, setCurr] = useState({});
 	useEffect(() => {
-		setResult(mergeQuestionResponseForStepper(questions, responses));
-		
+		setResult(mergeQuestionResponse(questions, responses));
 
 		setCurr(responses.find(res => res._id === props.responseId));
 		console.log(result);
 		console.log(curr)
 	}, [responses])
+
+	useEffect(() => {
+		const containers = document.querySelectorAll('.VictoryContainer');
+
+		containers.forEach(container => {
+			const svg = container.querySelector('svg');
+			if (svg) {
+				console.log("mod");
+				svg.style.overflow = 'visible';
+			}
+	    });
+	}, [result]);
 
   	return (
 		<section className='w-full flex-center flex-col'>
@@ -82,7 +93,7 @@ const ClientResult = (props) => {
 							</h3>
 
 							<div
-								className='flex flex-col lg:flex-row'
+								className='flex flex-col'
 							>
 								<div className='w-full flex flex-col gap-2 mt-8'>
 									{
@@ -118,7 +129,7 @@ const ClientResult = (props) => {
 								</div>
 
 								<div
-									className='p-4'
+									className='m-16'
 								>
 									{
 										console.log(res.options?.map((r, i) => {
@@ -146,17 +157,19 @@ const ClientResult = (props) => {
 														(curr.response[idx]?.options[0] === i) ? '#A6ADBB' : ""
 										})}
 
-										innerRadius={({ datum }) => (datum.color === "#A6ADBB") ? 110 : 100}
-										radius={({ datum }) => (datum.color === "#A6ADBB") ? 160 : 150}
+										innerRadius={({ datum }) => (datum.color === "#A6ADBB") ? 60 : 50}
+										radius={({ datum }) => (datum.color === "#A6ADBB") ? 110 : 100}
 										padAngle={5}
 										
+										height={400}
+										width={1800}
 										style={{
 											data: {
 												fillOpacity: 0.9, stroke: "#2A323C", strokeWidth: 2
 											},
 											labels: {
 												fontSize: 18, fill: "#A6ADBB"
-											}
+											},
 										}}
 									/>
 								</div>
@@ -170,12 +183,47 @@ const ClientResult = (props) => {
   	)
 }
 const CustomLabel = (props) => {
-	const percentage = ((props.datum.y / props.data.reduce((acc, d) => acc + d.y, 0)) * 100).toFixed(2) + '%';
-  
-	return (
-	  <g>
-		<VictoryLabel {...props} text={`${props.datum.x}\n${percentage}`} />
-	  </g>
-	);
-  };
+	const maxLineLength = 25; // Adjust this value based on your requirements
+    const percentage = ((props.datum.y / props.data.reduce((acc, d) => acc + d.y, 0)) * 100).toFixed(2) + '%';
+
+    // Split the text into multiple lines using the breakTextIntoLines function
+    const lines = breakTextIntoLines(props.datum.x, maxLineLength).map((line, index) => (
+        <tspan key={index} x={props.x} dy={index === 0 ? 0 : '1.2em'}>
+            {line}
+        </tspan>
+    ));
+	lines.push(<tspan x={props.x} dy="1.4em">
+					({percentage})
+				</tspan>);
+
+    return (
+        <g>
+            <VictoryLabel {...props} text={lines} />
+            <tspan x={props.x} dy="1.2em">
+                {percentage}
+            </tspan>
+        </g>
+    );
+};
+
+const breakTextIntoLines = (text, maxLineLength) => {
+    const words = text.split(' ');
+    let currentLine = '';
+    const lines = [];
+
+    for (const word of words) {
+        if ((currentLine + word).length <= maxLineLength) {
+            currentLine += (currentLine === '' ? '' : ' ') + word;
+        } else {
+            lines.push(currentLine);
+            currentLine = word;
+        }
+    }
+
+    if (currentLine !== '') {
+        lines.push(currentLine);
+    }
+
+    return lines;
+};
 export default ClientResult;

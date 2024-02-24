@@ -1,4 +1,4 @@
-const mergeQuestionResponseForStepper = (questions, responses) => {
+const mergeQuestionResponse = (questions, responses) => {
   
   responses = responses.flatMap(res => (res.response))
 
@@ -27,4 +27,4 @@ const mergeQuestionResponseForStepper = (questions, responses) => {
   });
 }
 
-export default mergeQuestionResponseForStepper;
+export default mergeQuestionResponse;

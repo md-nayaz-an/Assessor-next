@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
 
 import dynamic from 'next/dynamic';
-import mergeQuestionResponseForStepper from '@utils/mergeQuestionResponseForStepper';
+import mergeQuestionResponse from '@utils/mergeQuestionResponse';
 import { useSession } from 'next-auth/react';
 import { questionListTransform } from '@utils/questionListTransform';
 import QuizBetComp from './QuizBetComp';
@@ -228,7 +228,7 @@ const AssessmentIndividual = (props) => {
 						<Steps 
 							responses={props.responses}
 							current={current}
-							prevResponses={mergeQuestionResponseForStepper(rawQuestions, prevResponses)}
+							prevResponses={mergeQuestionResponse(rawQuestions, prevResponses)}
 						/>
 
 						<div className='w-full rounded-lg'>
