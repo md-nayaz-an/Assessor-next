@@ -1,6 +1,7 @@
 import Responses from "@models/responses";
 import Videos from "@models/videos";
 import Questions from "@models/questions";
+import User from "@models/user";
 import { connectToDB } from "@utils/database";
 
 export const GET = async (request) => {

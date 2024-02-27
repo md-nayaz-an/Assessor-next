@@ -137,7 +137,7 @@ const AssessmentIndividual = (props) => {
 				});
 				return data;
 			}).then(data => {
-				router.push("/client/responses/" + data._id + "/" + props.videoId);
+				router.push("/client/responses/" + props.videoId + "/" + data._id );
 			})
 			.catch(err => {
 				console.error(err);

@@ -8,7 +8,7 @@ const AdminResponsesAssessments = () => {
     const [videos, setVideos] = useState([]);
 
     const fetchVideos = async () => {
-        const res = await fetch('/api/videos/analytics', {
+        const res = await fetch('/api/analytics/videos', {
             cache: 'no-store'
         });
 
@@ -65,7 +65,7 @@ const AdminResponsesAssessments = () => {
                                         <button 
                                             className='btn btn-link'
                                         >   
-                                            <Link href={`/admin/assessments/${video._id?._id}`} target="_blank">
+                                            <Link href={`/admin/responses/${video._id?._id}`} target="_blank">
                                                 Explore
                                             </Link>
                                         </button>
