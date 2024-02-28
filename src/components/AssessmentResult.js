@@ -7,11 +7,9 @@ const AssessmentResult = (props) => {
 
     const [responses, setResponses] = useState([]);
     const [videoDetails, setVideoDetails] = useState({});
+    const [questions, setQuestions] = useState([]);
     const [curr, setCurr] = useState(0);
 
-    useEffect(() => {
-        console.log(curr);
-    }, [curr])
     const fetchResponses = async (page = 1, perPage = 25) => {
         const res = await fetch(`/api/analytics/responses/${props.videoId}?page=${page}&perPage=${perPage}`, {
             //cache: 'no-store'
@@ -33,16 +31,14 @@ const AssessmentResult = (props) => {
             return
 
         const data = await res.json();
-        setVideoDetails(data);
-
+        setVideoDetails(data.video);
+        setQuestions(data.questions);
     }
 
     useEffect(() => {
         fetchResponses(1, 25);
         fetchVideoDetails();
     }, []);
-
-
 
     const renderPaginationButtons = () => {
         const { totalPages, page } = responses;
@@ -112,11 +108,11 @@ const AssessmentResult = (props) => {
                 className='flex justify-between'
             >
                 <h1 className='text-xl m-2'>
-                    {videoDetails?.video?.title}
+                    {videoDetails?.title}
                     <button
                         className='btn btn-ghost btn-xs'
                     >
-                        <Link href={"/admin/assessments/" + videoDetails?.video?._id} target="_blank">
+                        <Link href={"/admin/assessments/" + videoDetails?._id} target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path xmlns="http://www.w3.org/2000/svg" id="Vector" d="M10.0002 5H8.2002C7.08009 5 6.51962 5 6.0918 5.21799C5.71547 5.40973 5.40973 5.71547 5.21799 6.0918C5 6.51962 5 7.08009 5 8.2002V15.8002C5 16.9203 5 17.4801 5.21799 17.9079C5.40973 18.2842 5.71547 18.5905 6.0918 18.7822C6.5192 19 7.07899 19 8.19691 19H15.8031C16.921 19 17.48 19 17.9074 18.7822C18.2837 18.5905 18.5905 18.2839 18.7822 17.9076C19 17.4802 19 16.921 19 15.8031V14M20 9V4M20 4H15M20 4L13 11" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>    
                             </svg>
@@ -125,14 +121,13 @@ const AssessmentResult = (props) => {
                 </h1>
 
                 {
-                    (videoDetails?.questions) &&
                     <select
                         className="select select-bordered w-full max-w-xs"
                         onChange={e => setCurr(e.target.value)}
                         value={curr}
                     >
                         {
-                            videoDetails?.questions.map((question, index) => (
+                            questions.map((question, index) => (
                                 <option
                                     key={index}
                                     value={index}
@@ -144,15 +139,59 @@ const AssessmentResult = (props) => {
                     </select>
                 }
             </div>
-            <div className="overflow-x-auto">
-                <table className="table">
+            <div className="overflow-auto my-2">
+                <table className="table table-pin-rows">
                     <thead>
-                    <tr>
-                        <th>{" "}</th>
-                        <th>Name</th>
-                        <th>Attempted on</th>
-                        <th>{" "}</th>
-                    </tr>
+                        <tr className="bg-base-200">
+                            <th>{" "}</th>
+                            <th>Name</th>
+                            <th>Attempted on</th>
+                            <th
+                                className='text-center'
+                                colSpan={questions[curr]?.options.length}
+                            >
+                                <p
+                                    className={`whitespace-pre-line line-clamp-3 hover:overflow-visible`}
+                                >
+                                    {questions[curr]?.question}
+                                </p>
+                            </th>
+                            <th>
+                                <p
+                                    className={`whitespace-pre-line line-clamp-3 hover:overflow-visible`}
+                                >
+                                    {questions[curr]?.sliderquestion}
+                                </p>
+                            </th>
+                            <th>
+                                Thoughts
+                            </th>
+                            <th>
+                                Bet
+                            </th>
+                        </tr>
+                        <tr className="">
+                            <th>{" "}</th>
+                            <th>{" "}</th>
+                            <th>{" "}</th>
+                            {
+                                questions[curr]?.options?.map((option, index) => (
+                                    <th
+                                        className='h-16 max-w-xs'
+                                    >
+                                        <p
+                                            className={`whitespace-pre-line line-clamp-3 hover:overflow-visible`}
+                                        >
+                                            {option.option}
+                                        </p>
+                                        {
+                                            option.isCorrect &&
+                                            <div className="badge badge-xs badge-outline badge-accent">True</div>
+                                        }
+                                    </th>
+                                ))
+                            }
+                        </tr>
                     </thead>
                     <tbody
                         className='text-base'
@@ -184,14 +223,60 @@ const AssessmentResult = (props) => {
                                     <td>
                                         <span className='text-sm'>{new Date(response.timestamp).toLocaleString()}</span>
                                     </td>
+
+                                    {
+                                        questions[curr]?.options?.map((option, index) => (
+                                            <td className='text-center align-middle gap-2'>
+                                                {
+                                                    (response?.response[curr]?.options[0] == index) &&
+                                                    <span className="indicator-item indicator-middle indicator-center badge badge-xs badge-primary self-center m-1"></span>
+                                                }
+                                                {
+                                                    (response?.response[curr]?.options[2] == index) &&
+                                                    <span className="indicator-item indicator-middle indicator-center badge badge-xs badge-secondary self-center m-1"></span>
+                                                }
+                                            </td>
+                                        ))
+                                    }
+                                    <td>
+                                        {response?.response[curr]?.probability}
+                                    </td>
+                                    <td>
+                                        {response?.response[curr]?.thoughts}
+                                    </td>
+                                    <td>
+                                        {(response?.response[curr]?.options[1] &&
+                                            response?.response[curr]?.options[1] == 0) ?
+                                            "Yes" : "No"
+                                        }
+                                    </td>
                                 </tr>
                             ))
                         }
                     </tbody>
                 </table>
             </div>
-            <div className="join self-center">
-                {renderPaginationButtons()}
+            <div
+                className='flex justify-between'
+            >
+                <div />
+                <div className="join self-center">
+                    {renderPaginationButtons()}
+                </div>
+                <div className='flex flex-col mx-4'>
+                    <div
+                        className='flex items-center'
+                    >
+                        <span className="indicator-item indicator-middle indicator-center badge badge-xs badge-primary self-center m-1"></span>
+                        First
+                    </div>
+                    <div
+                        className='flex items-center'
+                    >
+                        <span className="indicator-item indicator-middle indicator-center badge badge-xs badge-secondary self-center m-1"></span>
+                        Second
+                    </div>
+                </div>
             </div>
         </div>
     )
