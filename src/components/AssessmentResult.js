@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
+import DownloadModal from './DownloadModal';
 
 const AssessmentResult = (props) => {
 
@@ -120,24 +121,29 @@ const AssessmentResult = (props) => {
                     </button>
                 </h1>
 
-                {
-                    <select
-                        className="select select-bordered w-full max-w-xs"
-                        onChange={e => setCurr(e.target.value)}
-                        value={curr}
-                    >
-                        {
-                            questions.map((question, index) => (
-                                <option
-                                    key={index}
-                                    value={index}
-                                >
-                                    {(index + 1 + ") ") + question.question}
-                                </option>
-                            ))
-                        }
-                    </select>
-                }
+                <select
+                    className="select select-bordered w-full max-w-xs"
+                    onChange={e => setCurr(e.target.value)}
+                    value={curr}
+                >
+                    {
+                        questions.map((question, index) => (
+                            <option
+                                key={index}
+                                value={index}
+                            >
+                                {(index + 1 + ") ") + question.question}
+                            </option>
+                        ))
+                    }
+                </select>
+
+                <DownloadModal
+                    videoId={props.videoId}
+                    videoDetails={videoDetails}
+                    questions={questions}
+                    totalPages={responses.totalPages}
+                />
             </div>
             <div className="overflow-auto my-2">
                 <table className="table table-pin-rows">
@@ -225,7 +231,7 @@ const AssessmentResult = (props) => {
                                     </td>
 
                                     {
-                                        questions[curr]?.options?.map((option, index) => (
+                                        questions[curr]?.options?.map((_, index) => (
                                             <td className='text-center align-middle gap-2'>
                                                 {
                                                     (response?.response[curr]?.options[0] == index) &&
@@ -245,8 +251,7 @@ const AssessmentResult = (props) => {
                                         {response?.response[curr]?.thoughts}
                                     </td>
                                     <td>
-                                        {(response?.response[curr]?.options[1] &&
-                                            response?.response[curr]?.options[1] == 0) ?
+                                        {(response?.response[curr]?.options[1] !== undefined && response?.response[curr]?.options[1] === 0) ?
                                             "Yes" : "No"
                                         }
                                     </td>
