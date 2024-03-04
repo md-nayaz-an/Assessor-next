@@ -12,20 +12,19 @@ const ResponseTable = () => {
     const searchParams = useSearchParams();
 
     const [responses, setResponses] = useRecoilState(responsesAtom);
-    
+
     const createQueryString = useCallback(
         (name, value) => {
             const params = new URLSearchParams(searchParams)
             params.set(name, value)
-        
             return params.toString()
         },
         [searchParams]
     )
 
-    const fetchResponses = async () => {
-        const res = await fetch('/api/responses', {
-            cache: 'no-store'
+    const fetchResponses = async (page = 1, perPage = 25) => {
+        const res = await fetch(`/api/responses?page=${page}&perPage=${perPage}`, {
+            //cache: 'no-store'
         });
 
         const data = await res.json();
@@ -33,15 +32,75 @@ const ResponseTable = () => {
     }
 
     useEffect(() => {
-        fetchResponses();
+        fetchResponses(1, 25);
     }, []);
 
-    useEffect(() => {
-        console.log(responses);
-    }, [responses]);
+
+
+    const renderPaginationButtons = () => {
+        const { totalPages, page } = responses;
+
+        if (totalPages <= 1) {
+            return null; // Don't render pagination buttons if there's only one page
+        }
+
+        const currentPage = parseInt(page) || 1; // Convert the page to a number
+
+        const addPageButton = (pageNumber) => (
+            <button
+                key={pageNumber}
+                className={`join-item btn ${currentPage === pageNumber ? 'btn-active' : ''}`}
+                onClick={() => fetchResponses(pageNumber, 25)}
+            >
+                {pageNumber}
+            </button>
+        );
+
+        return (
+            <>
+                {/* Directly include the first page */}
+                <button
+                    key={1}
+                    className={`join-item btn ${currentPage === 1 ? 'btn-active' : ''}`}
+                    onClick={() => fetchResponses(1, 25)}
+                >
+                    1
+                </button>
+
+                {totalPages > 2 && currentPage > 2 && (
+                    // If the current page is not the second page, include "..." placeholder
+                    <button key="ellipsis-start" className="join-item btn btn-disabled" disabled>
+                        ...
+                    </button>
+                )}
+
+                {/* Include pages around the current page */}
+                {Array.from({ length: Math.min(3, totalPages - 1) }, (_, i) => currentPage + i - 1).map((i) => {
+                    if(i <= 1 || i >= totalPages) return;
+                    return addPageButton(i);
+                })}
+
+                {totalPages > 2 && currentPage < totalPages - 1 && (
+                    // If the current page is not the second-to-last page, include "..." placeholder
+                    <button key="ellipsis-end" className="join-item btn btn-disabled" disabled>
+                        ...
+                    </button>
+                )}
+
+                {/* Directly include the last page */}
+                <button
+                    key={totalPages}
+                    className={`join-item btn ${currentPage === totalPages ? 'btn-active' : ''}`}
+                    onClick={() => fetchResponses(totalPages, 25)}
+                >
+                    {totalPages}
+                </button>
+            </>
+        );
+    };
 
     return (
-        <div className='w-full h-96 p-4 rounded shadow-lg flex flex-col'>
+        <div className='w-full h-[75vh] p-4 rounded shadow-lg flex flex-col'>
             <h1 className='text-lg'>
                 Responses
             </h1>
@@ -50,28 +109,28 @@ const ResponseTable = () => {
                 <table className="table">
                     <thead>
                     <tr>
-                        <th></th>
+                        <th>{" "}</th>
                         <th>Name</th>
                         <th>Assessment Title</th>
                         <th>Attempted on</th>
-                        <th></th>
+                        <th>{" "}</th>
                     </tr>
                     </thead>
                     <tbody
                         className='text-base'
                     >
                         {
-                            responses.map((response, index) => (
+                            responses.responses?.map((response, index) => (
                                 <tr>
-                                    <th>{index}</th>
+                                    <th>{index + 1}</th>
                                     <td>
                                         <div
                                             className='flex flex-col gap-1'
                                         >
-                                            <span className='mx-2'>{response.name}</span>
+                                            <span className='mx-2'>{response.name || response.userid?.name}</span>
                                             {
-                                                response.mail && 
-                                                <span className='badge text-xs'>{response.mail}</span>
+                                                (response.mail || response.userid?.email) && 
+                                                <span className='badge text-xs'>{response.mail || response.userid?.email}</span>
                                             }
                                         </div>
                                     </td>
@@ -92,18 +151,14 @@ const ResponseTable = () => {
                                         </div>
                                     </td>
                                     <td>{new Date(response.timestamp).toLocaleString()}</td>
-                                    
+
                                     <td>
                                         <button 
                                             className='btn btn-link'
-                                            onClick={() => {
-                                                router.push(`/admin/responses/${response._id}?`)
-                                            }}
-                                        >
-                                            Explore
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 1024 1024">
-                                                <path d="M364.8 106.666667L298.666667 172.8 637.866667 512 298.666667 851.2l66.133333 66.133333L768 512z"/>
-                                            </svg>
+                                        >   
+                                            <Link href={`/admin/responses/${response.videoid?._id}/${response._id}`} target="_blank">
+                                                Explore
+                                            </Link>
                                         </button>
                                     </td>
                                 </tr>
@@ -111,7 +166,10 @@ const ResponseTable = () => {
                         }
                     </tbody>
                 </table>
-                </div>
+            </div>
+            <div className="join self-center">
+                {renderPaginationButtons()}
+            </div>
         </div>
     )
 }

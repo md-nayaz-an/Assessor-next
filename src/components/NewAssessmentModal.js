@@ -1,4 +1,5 @@
-import React from 'react'
+import { useSession } from 'next-auth/react';
+import React, { useEffect } from 'react'
 import { useState } from 'react';
 
 const NewAssessment = ({ setVideos }) => {
@@ -13,12 +14,15 @@ const NewAssessment = ({ setVideos }) => {
 		setUrl('');
 	}
 
+	const session = useSession();
+
 	const onSave = async () => {
 
 		const videoDetails = {
 			title,
 			description,
 			url,
+			adminid: session?.data?.user?.id
 		}
 
 		try {
@@ -41,7 +45,6 @@ const NewAssessment = ({ setVideos }) => {
 		}
 		
 		let modal = document.getElementById('my_modal_1');
-		console.log(modal);
 		modal.close();
 	}
 	

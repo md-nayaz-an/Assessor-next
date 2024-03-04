@@ -11,6 +11,10 @@ const ResponseSchema = new Schema ({
     mail: {
         type: String,
     },
+    userid: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
     timestamp: {
         type: Number,
     },

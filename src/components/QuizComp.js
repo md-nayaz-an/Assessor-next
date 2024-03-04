@@ -1,33 +1,53 @@
 "use client";
 
-import { createResponseState } from '@recoil/atoms/responseAtom';
+import { getResponseOptionsSelector } from '@recoil/selectors/getResponseOptionsSelector';
 import { updateResponseSelector } from '@recoil/selectors/updateResponseSelector';
+import { useSession } from 'next-auth/react';
 import React, { useState } from 'react'
 import { useEffect } from 'react';
-import { useRecoilCallback, useSetRecoilState } from 'recoil';
+import { useRecoilCallback, useRecoilValue, useSetRecoilState } from 'recoil';
 
 const QuizComp = (props) => {
-    
+
+    const session = useSession();
+
     const [selected, setSelected] = useState(-1);
     const [probability, setProbability] = useState(-1);
     const [thoughts, setThoughts] = useState("");
 
     const setResponse = useSetRecoilState(updateResponseSelector);
+    
+    const responseOptions = useRecoilValue(
+        getResponseOptionsSelector({
+            videoId: props.videoId,
+            userid: session?.data?.user?.id,
+            questionId: props.question._id
+        })
+    );
 
-    const onSave = () => {
-        console.log(props.videoId);
-        console.log(props.question._id);
-        console.log([selected]);
+    const onSave = async () => {
+        let prevOptions = [...responseOptions];
+
+        if(prevOptions.length === 0 && props.question.type === "question")
+            prevOptions = (selected === -1) ? [] : [selected];
+        else if(prevOptions.length === 1 && props.question.type === "revise") {
+            prevOptions.push(-1);
+            prevOptions.push(selected);
+        }else if(prevOptions.length === 2 && props.question.type === "revise") {
+            prevOptions.push(selected);
+        }
+
 
         const updateValue = {
             status: (selected === -1) ? 1 : 2,
-            options: (selected === -1) ? [] : [selected],
+            options: prevOptions,
             probability,
             thoughts
         }
 
         setResponse({
-            videoId: props.videoId, 
+            videoId: props.videoId,
+            userid: session?.data?.user?.id,
             questionId: props.question._id,
             updatedValues: updateValue
         });
@@ -36,17 +56,19 @@ const QuizComp = (props) => {
     }
 
     const onSkip = () => {
-        console.log(props.videoId);
-        console.log(props.question._id);
-        console.log([selected]);
+        let prevOptions = [...responseOptions];
+
+        if(prevOptions.length !== 0 && props.question.type === "revise")
+            prevOptions.push(-1);
+
 
         const updateValue = {
-            status: 1,
-            options: []
+            options: prevOptions,
         }
 
         setResponse({
-            videoId: props.videoId, 
+            videoId: props.videoId,
+            userid: session?.data?.user?.id,
             questionId: props.question._id,
             updatedValues: updateValue
         });
@@ -58,7 +80,13 @@ const QuizComp = (props) => {
         <div className='py-8 lg:px-4 w-full flex-center flex-col relative lg:pb-20'>
 
             <div className='py-4 w-full flex-center flex-col gap-2'>
-                <div className='max-w-full self-start text-2xl font-bold'>{props.question?.title}</div>
+                <div className='max-w-full self-start text-2xl font-bold'>
+                    {
+                        (props.question.type === "revise") &&
+                            <span className='text-error text-base'>Do you want to CHANGE your option for the question<br /></span>
+                    }
+                    {props.question?.title}
+                </div>
                 <div className='max-w-full self-start text-lg font-semibold'>{props.question?.question}</div>
                 
                 <ul className='w-full mx-4 menu bg-base-200 rounded-box gap-2'>
@@ -119,7 +147,7 @@ const QuizComp = (props) => {
 
             <div className='w-full flex-wrap flex justify-between gap-2 lg:-order-1'>
                 <button 
-                    className='btn w-2/5 lg:w-1/6 lg:-order-1'
+                    className='btn w-2/6 lg:w-1/6 lg:-order-1'
                     onClick={() => {
                         setSelected(-1);
                         setProbability(-1);
@@ -127,8 +155,17 @@ const QuizComp = (props) => {
                 >
                     Reset
                 </button>
+                {
+                    props.question.type === "revise" && 
+                    <button
+                        className='btn btn-neutral w-1/5 lg:w-1/6'
+                        onClick={onSkip}
+                    >
+                        Skip
+                    </button>
+                }
                 <button 
-                    className='btn btn-accent w-2/5 lg:w-1/6'
+                    className='btn btn-accent w-2/6 lg:w-1/6'
                     onClick={onSave}
                     disabled={selected === -1 || probability === -1 || thoughts === ""}
                 >

@@ -87,7 +87,7 @@ const AdminAssessmentIndividual = (props) => {
 	}
 	
 	useEffect(() => {
-		console.log(cloudQuestions);
+		//console.log(cloudQuestions);
 	}, [cloudQuestions]);
 	
 	return (
@@ -125,6 +125,7 @@ const AdminAssessmentIndividual = (props) => {
 						cloudQuestions={cloudQuestions}
 						onSeekForward={onSeekForward}
 						onSeekBackward={onSeekBackward}
+						totalDuration={playerRef.current?.getDuration()}
 					/>
 				</div>
 			</div>

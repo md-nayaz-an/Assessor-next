@@ -11,12 +11,21 @@ import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
 
 import dynamic from 'next/dynamic';
-import mergeQuestionResponseForStepper from '@utils/mergeQuestionResponseForStepper';
+import mergeQuestionResponse from '@utils/mergeQuestionResponse';
+import { useSession } from 'next-auth/react';
+import { questionListTransform } from '@utils/questionListTransform';
+import QuizBetComp from './QuizBetComp';
 const VideoClient = dynamic(() => import("./VideoClient"), { ssr: false });
 
 const AssessmentIndividual = (props) => {
 
 	const router = useRouter();
+	const session = useSession();
+
+	useEffect(() => {
+	  	console.log(props.responses);
+	}, [props.responses])
+	
 
 	const playerRef = useRef(null);
 	
@@ -26,15 +35,9 @@ const AssessmentIndividual = (props) => {
 		url: "",
 	});
 
+	const [rawQuestions, setRawQuestions] = useState([]);
 	const [questions, setQuestions] = useState([]);
 
-  	const [responses, setResponses] = useRecoilState(createResponseState(props.videoId));
-
-	const [prevResponses, setPrevResponses] = useState([]);
-	useEffect(() => {
-	  console.log(responses);
-	
-	}, [responses])
 
 	const fetchVideoDetails = async () => {
 		const res = await fetch('/api/videos/' + props.videoId, {
@@ -44,44 +47,37 @@ const AssessmentIndividual = (props) => {
 		setVideoDetails(data);
 		//console.log(data);
 	}
-	
-	const fetchPrevResponses = async () => {
-		const res = await fetch('/api/responses/' + props.videoId, {
-            cache: 'no-store'
-        });
-		const data = await res.json();
-		setPrevResponses(data);
-		//console.log(data);
-	}
-	
+
+
 	const fetchQuestions = async () => {
 		const res = await fetch('/api/questions/' + props.videoId, {
             cache: 'no-store'
         });
 		const data = await res.json();
-		setQuestions(data);
+		setRawQuestions(data);
 		//console.log(data);
+		let questionProcessed = await questionListTransform(data);
+		setQuestions(questionProcessed);
 	}
-	
+
 	useEffect(() => {
 		if(props.videoId) {
 			fetchVideoDetails();
 			fetchQuestions();
-			fetchPrevResponses();
 		}
-	}, [props])
+	}, [props.videoId])
 
 	const [start, setStart] = useState(false);
-  	
-	const [name, setName] = useState("");
-	const [mail, setMail] = useState("");
 
-	const onStartClick = () => {
+	const onStartClick = async() => {
+
+		if(rawQuestions.length === 0)
+			await fetchQuestions();
+
 		const initialResponseState = {
 			videoId: props.videoId,
-			name,
-			mail,
-			response: questions.map(question => ({
+			userid: props.userId,
+			response: rawQuestions.map(question => ({
 				questionid: question._id, 
 				options: [],
 				status: 0,
@@ -90,9 +86,11 @@ const AssessmentIndividual = (props) => {
 		};
 
 		setCurrent(0);
-	  	setResponses(initialResponseState);
+	  	props.setResponses(initialResponseState);
 	  	setStart(true);
 		setPlay(true);
+
+		console.log(props.responses);
 	}
 
 	const [current, setCurrent] = useState(-1);
@@ -108,29 +106,35 @@ const AssessmentIndividual = (props) => {
 		setShow(false);
 	}
 
+	const [submitLoader, setSubmitLoader] = useState(false);
 	const onSubmit = async () => {
-		console.log("submited");
-		
+		setSubmitLoader(true);
 		try {
 			const response = await fetch("/api/responses/new", {
 				method: "POST",
-				body: JSON.stringify(responses),
+				body: JSON.stringify(props.responses),
 			})
 			.then(res => res.json())
 			.then(data => {
-				router.push("/client/responses/" + data._id + "/" + props.videoId);
+				session.update({
+					...session.data,
+					userData: {
+						...session.data.userData,
+						points: data.userUpdate.points
+					}
+				});
+				return data;
+			}).then(data => {
+				router.push("/client/responses/" + props.videoId + "/" + data._id );
 			})
 			.catch(err => {
 				console.error(err);
 			});
 
-			if(response.ok) {
-				const data = response.json();
-				console.log(data._id);
-				
-			}
 		} catch (error) {
 			console.error(error);
+		} finally {
+			setSubmitLoader(false);
 		}
 	}
 	
@@ -164,10 +168,23 @@ const AssessmentIndividual = (props) => {
 							setVideoProgress={setVideoProgress}
 							play={play}
 							setPlay={setPlay}
+							className={`${(session?.data?.userData?.role === "admin") ? " pointer-events-auto" : "pointer-events-none"}`}
 						/>
-
+						{
+							session?.data?.userData?.role !== "admin" &&
+						<><div 
+							className={`absolute top-0 p-4 w-full h-1/5 bg-base-100 opacity-96 overflow-auto text-lg text-accent-focus
+								${(!play) ? '': 'invisible transition-all ease-out delay-[5000ms]'}
+							`}
+						/>
 						<div 
-							className={`absolute bottom-0 p-4 w-full h-2/4 bg-neutral-focus opacity-96 rounded-t-xl overflow-auto text-lg text-accent-focus
+							className={`absolute bottom-0 p-4 w-full h-1/5 bg-base-100 opacity-96 overflow-auto text-lg text-accent-focus
+								${(!play) ? '': 'invisible transition-all ease-out delay-[5000ms]'}
+							`}
+						/></>
+						}
+						<div 
+							className={`absolute z-50 bottom-0 p-4 w-full h-2/4 bg-neutral-focus opacity-96 rounded-t-xl overflow-auto text-lg text-accent-focus
 								${(show) ? '': 'invisible'} 
 								hover:h-3/4 
 								transition-all ease-in-out delay-150
@@ -181,29 +198,45 @@ const AssessmentIndividual = (props) => {
 					
 					{
 						(start) ?
-							<button className='btn btn-primary self-end' onClick={onSubmit} disabled={current < responses.response.length}>End and Submit</button> :
+							<button 
+								className='btn btn-primary self-end' 
+								onClick={onSubmit} 
+								disabled={current < questions.length || submitLoader}
+							>
+								{submitLoader && <span className="loading loading-spinner"></span>}
+								End and Submit
+							</button> :
 							<></>
 					}
 				</div>
-				
+
 				{
 					start ?
 					<div className='lg:p-4 w-full lg:w-1/2 flex-center flex-col gap-2'>
 						<Steps 
-							responses={responses}
+							responses={props.responses}
 							current={current}
-							prevResponses={mergeQuestionResponseForStepper(questions, prevResponses)}
+							videoId={props.videoId}
 						/>
 
 						<div className='w-full rounded-lg'>
 							{
-								(show) ?
-								<QuizComp
-									videoId={props.videoId}
-									question={questions[current]}
-									onNext={onNext}
-									show={show}
-								/> :
+								(show) ? 
+									(questions[current].type === "bet") ?
+										<QuizBetComp
+											videoId={props.videoId}
+											question={questions[current]}
+											onNext={onNext}
+											show={show}
+										/>
+										:
+										<QuizComp
+											videoId={props.videoId}
+											question={questions[current]}
+											onNext={onNext}
+											show={show}
+										/>
+								:
 						        <div className='pb-48 w-full flex-center flex-col relative lg:pb-20 min-h-[6rem]'>
 									{
 										(current >= 0 && current < questions.length) &&
@@ -227,25 +260,14 @@ const AssessmentIndividual = (props) => {
 					</div>:
 					<div className='p-4 flex-center w-full lg:w-1/2'>
 						<div className='w-full flex-center flex-col gap-2 self-center'>
-							<input
-								type="text"
-								placeholder="Name"
-								className="input input-bordered w-full max-w-xs" 	
-								value={name}
-								required
-								onChange={(e) => setName(e.target.value)}
-							/>
-
-							<input 
-								type="email"
-								placeholder="E-mail" 
-								className="input input-bordered w-full max-w-xs"
-								value={mail}
-								required
-								onChange={(e) => setMail(e.target.value)}
-							/>
-
-							<button className='btn btn-accent' onClick={onStartClick}>Start Assessment</button>
+							<button 
+								className='btn btn-accent' 
+								onClick={onStartClick}
+								disabled={questions.length === 0}
+							>
+								{questions.length === 0 && <span className="loading loading-spinner"></span>}
+								Start Assessment
+							</button>
 						</div>
 					</div>
 				}

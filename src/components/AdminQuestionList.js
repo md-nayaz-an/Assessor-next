@@ -1,6 +1,5 @@
 'use client';
 
-import { createQuestionState } from '@recoil/atoms/questionsAtom';
 import { appendQuestionDataSelector } from '@recoil/selectors/appendQuestionDataSelector';
 import { deleteQuestionDataSelector } from '@recoil/selectors/deleteQuestionDataSelector';
 import { updateQuestionDataSelector } from '@recoil/selectors/updateQuestionDataSelector';
@@ -10,9 +9,9 @@ import { useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 
 const AdminQuestionList = (props) => {
-    
+
     const [checked, setChecked] = useState(-1);
-    
+
 
     const setNewQuestion = useSetRecoilState(appendQuestionDataSelector);
     const updateQuestion = useSetRecoilState(updateQuestionDataSelector);
@@ -30,10 +29,16 @@ const AdminQuestionList = (props) => {
                 question:"",
                 options: [],
                 sliderquestion: "",
+                followUps: [],
             }
         })
     }
 
+    useEffect(() => {
+      console.log(props.localQuestions);
+    
+    }, [props.localQuestions])
+    
     return (
         <>
             <div className='max-h-80 w-full overflow-auto'>
@@ -51,11 +56,10 @@ const AdminQuestionList = (props) => {
                                 updateQuestion={updateQuestion}
                                 deleteQuestion={deleteQuestion}
                                 videoId={props.videoId}
+                                totalDuration={props.totalDuration}
                             />
                         ))
                     }
-
-                    
 
                     {
                         props.cloudQuestions.map((question, index) => (
@@ -139,6 +143,12 @@ export const ListComp = (props) => {
 
     const [question, setQuestion] = useState(props.question);
     const [options, setOptions] = useState(props.question.options);
+    const [followUps, setfollowUps] = useState(props.question.followUps || []);
+    const [correct, setCorrect] = useState(-1);
+
+    useEffect(() => {
+        console.log(question);
+    }, [question])
 
     const update = () => {
         props.updateQuestion({
@@ -146,7 +156,8 @@ export const ListComp = (props) => {
             index: props.index,
             updatedData: {
                 ...question,
-                options: options
+                options: options,
+                followUps: followUps,
             },
         })
     }
@@ -189,7 +200,7 @@ export const ListComp = (props) => {
                 </div>
                 
             </div>
-            <div className="collapse-content max-h-fit">     
+            <div className="collapse-content max-h-fit">
                 <div className="form-control w-full">
                     <label className="label">
                         <span className="label-text">Title</span>
@@ -247,6 +258,8 @@ export const ListComp = (props) => {
                                 setOptions={setOptions}
                                 key={index}
                                 cloud={props.cloud}
+                                correct={correct}
+                                setCorrect={setCorrect}
                             />
                         ))
                     }
@@ -284,6 +297,51 @@ export const ListComp = (props) => {
                         
                         disabled={props.cloud}
                     />
+
+                    <label className="label mt-4">
+                        <span className="label-text">Follow Ups</span>
+                    </label>
+                    {
+                        followUps?.map((followUp, index) => (
+                            <FollowUpOptions
+                                index={index}
+                                followUp={followUp}
+                                setfollowUps={setfollowUps}
+                                key={index}
+                                cloud={props.cloud}
+                                totalDuration={props.totalDuration}
+                                marker={question.timestamp}
+                            />
+                        ))
+                    }
+                    {
+                        !props.cloud &&
+
+                        <button
+                            className='btn btn-circle btn-secondary m-4 w-1/3'
+                            onClick={() =>
+                                setfollowUps(prevFollowUps => ([
+                                        ...prevFollowUps,
+                                        {
+                                            showBet: true,
+                                            betQuestion: "",
+                                            points: 0,
+                                            gain: 0.0,
+                                            loss: 0.0,
+                                            penalty: 0,
+                                            duration: 10,
+                                            popup: question.timestamp + 1,
+                                            showRevision: true,
+                                            revisePopup: question.timestamp + 2,
+                                        }
+                                ]))}
+                        >
+                            Add FollowUps
+                        </button>
+
+                    }
+                
+
                 </div>
 
                 {
@@ -307,6 +365,445 @@ export const ListComp = (props) => {
                     </div>
                 }
             </div>
+        </div>
+    )
+}
+
+const FollowUpOptions = (props) => {
+
+    const handleBetPopup = (dur) => {
+        let popup = props.followUp.popup + dur;
+        let revisePopup = props.followUp.revisePopup
+        if( popup >= revisePopup )
+            revisePopup = popup + 1;
+
+        if(
+            props.totalDuration !== undefined && 
+            props.totalDuration !== 0 && 
+            popup > props.marker &&
+            popup <= props.totalDuration)
+        props.setfollowUps(prevFollowUps => [
+            ...prevFollowUps.slice(0, props.index),
+            {
+                ...prevFollowUps[props.index],
+                popup: popup,
+                revisePopup: revisePopup
+            },
+            ...prevFollowUps.slice(props.index + 1)
+        ]);
+    }
+    const handleRevisePopup = (dur) => {
+        if(props.totalDuration !== undefined && 
+            props.totalDuration !== 0 && 
+            props.followUp.revisePopup + dur > props.marker && 
+            props.followUp.revisePopup + dur <= props.totalDuration)
+        props.setfollowUps(prevFollowUps => [
+            ...prevFollowUps.slice(0, props.index),
+            {
+                ...prevFollowUps[props.index],
+                revisePopup: prevFollowUps[props.index].revisePopup + dur
+            },
+            ...prevFollowUps.slice(props.index + 1)
+        ]);
+    }
+
+    return (
+        <div
+            className='w-full border border-neutral rounded-md my-2 p-2'
+        >   
+            <label className="label cursor-pointer w-1/3">
+                <span className="label-text">Include Bets</span> 
+                <input 
+                    type="checkbox" 
+                    checked={props.followUp.showBet}
+                    className="checkbox"
+                    onChange={(e) => {
+                        props.setfollowUps(prevFollowUps => [
+                            ...prevFollowUps.slice(0, props.index),
+                            {
+                                ...prevFollowUps[props.index],
+                                showBet: e.target.checked
+                            },
+                            ...prevFollowUps.slice(props.index + 1)
+                        ]);
+                    }}
+                />
+            </label>
+            
+            {   
+                 props.followUp.showBet &&
+                <>
+                    <label className="label">
+                        <span className="label-text">Betting Question</span>
+                    </label>
+                    <input
+                        type="text" 
+                        placeholder={"Enter Bet Question"}
+                        className="input input-bordered w-full max-w-lg"
+                        value={props.followUp.betQuestion}
+                        onChange={(e) => {
+                            props.setfollowUps(prevFollowUps => [
+                                ...prevFollowUps.slice(0, props.index),
+                                {
+                                    ...prevFollowUps[props.index],
+                                    betQuestion: e.target.value
+                                },
+                                ...prevFollowUps.slice(props.index + 1)
+                            ]);
+                        }}
+                        disabled={props.cloud}
+                    />
+
+                    <label className="label">
+                        <span className="label-text">Points at stake</span>
+                    </label>
+                    <input
+                        type="text" 
+                        placeholder={"Enter Points"}
+                        className="input input-bordered w-full max-w-lg"
+                        value={props.followUp.points}
+                        onChange={(e) => {
+                            let val = e.target.value
+                            val = val === "" ? 0 : val;
+                            if(!isNaN(parseFloat(val)) && isFinite(val))
+                                props.setfollowUps(prevFollowUps => [
+                                    ...prevFollowUps.slice(0, props.index),
+                                    {
+                                        ...prevFollowUps[props.index],
+                                        points: parseFloat(val)
+                                    },
+                                    ...prevFollowUps.slice(props.index + 1)
+                            ]);
+                        }}
+                        disabled={props.cloud}
+                    />
+                    <div
+                        className='flex flex-row'
+                    >
+                        <div
+                            className='p-2 w-1/2'
+                        >
+                            <label className="label">
+                                <span className="label-text">Gain Percentage</span>
+                            </label>
+                            <input
+                                type="text" 
+                                placeholder={"Enter Points"}
+                                className="input input-bordered w-full max-w-lg"
+                                value={props.followUp.gain * 100.0}
+                                onChange={(e) => {
+                                    let val = e.target.value
+                                    val = val === "" ? 0 : val;
+                                    if(!isNaN(parseFloat(val)) && isFinite(val))
+                                        props.setfollowUps(prevFollowUps => [
+                                            ...prevFollowUps.slice(0, props.index),
+                                            {
+                                                ...prevFollowUps[props.index],
+                                                gain: parseFloat(val) / 100.0
+                                            },
+                                            ...prevFollowUps.slice(props.index + 1)
+                                    ]);
+                                }}
+                                disabled={props.cloud}
+                            />
+                        </div>
+                        <div
+                            className='p-2 w-1/2'
+                        >
+                            <label className="label">
+                                <span className="label-text">Loss Percentage</span>
+                            </label>
+                            <input
+                                type="text" 
+                                placeholder={"Enter Points"}
+                                className="input input-bordered w-full max-w-lg"
+                                value={props.followUp.loss * 100.0}
+                                onChange={(e) => {
+                                    let val = e.target.value
+                                    val = val === "" ? 0 : val;
+                                    if(!isNaN(parseFloat(val)) && isFinite(val))
+                                        props.setfollowUps(prevFollowUps => [
+                                            ...prevFollowUps.slice(0, props.index),
+                                            {
+                                                ...prevFollowUps[props.index],
+                                                loss: parseFloat(val) / 100.0
+                                            },
+                                            ...prevFollowUps.slice(props.index + 1)
+                                    ]);
+                                }}
+                                disabled={props.cloud}
+                            />
+                        </div>
+                    </div>
+
+                    <div
+                        className='flex flex-row'
+                    >
+                        <div
+                            className='p-2 w-1/2'
+                        >
+                            <label className="label">
+                                <span className="label-text">Penalty Points</span>
+                            </label>
+                            <input
+                                type="text" 
+                                placeholder={"Enter Penalty Points"}
+                                className="input input-bordered w-full max-w-lg"
+                                value={props.followUp.penalty}
+                                onChange={(e) => {
+                                    let val = e.target.value
+                                    val = val === "" ? 0 : val;
+                                    if(!isNaN(parseFloat(val)) && isFinite(val))
+                                        props.setfollowUps(prevFollowUps => [
+                                            ...prevFollowUps.slice(0, props.index),
+                                            {
+                                                ...prevFollowUps[props.index],
+                                                penalty: parseFloat(val)
+                                            },
+                                            ...prevFollowUps.slice(props.index + 1)
+                                    ]);
+                                }}
+                                disabled={props.cloud}
+                            />
+                        </div>
+                        <div
+                            className='p-2 w-1/2'
+                        >
+                            <label className="label">
+                                <span className="label-text">Bet Popup Duration(sec)</span>
+                            </label>
+                            <div className="flex flex-center text-center auto-cols-max gap-2">
+                                    
+                                <button className="btn btn-circle btn-neutral text-xl " 
+                                    onClick={() => {
+                                        let val = props.followUp.duration - 1;
+                                        if(val >= 5 && val <= 20)
+                                        props.setfollowUps(prevFollowUps => [
+                                            ...prevFollowUps.slice(0, props.index),
+                                            {
+                                                ...prevFollowUps[props.index],
+                                                duration: val
+                                            },
+                                            ...prevFollowUps.slice(props.index + 1)
+                                    ]);
+                                    }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path xmlns="http://www.w3.org/2000/svg" d="M7 5V19M17 7.329V16.671C17 17.7367 17 18.2695 16.7815 18.5432C16.5916 18.7812 16.3035 18.9197 15.9989 18.9194C15.6487 18.919 15.2327 18.5861 14.4005 17.9204L10.1235 14.4988C9.05578 13.6446 8.52194 13.2176 8.32866 12.7016C8.1592 12.2492 8.1592 11.7508 8.32866 11.2984C8.52194 10.7824 9.05578 10.3554 10.1235 9.50122L14.4005 6.07961C15.2327 5.41387 15.6487 5.081 15.9989 5.08063C16.3035 5.0803 16.5916 5.21876 16.7815 5.45677C17 5.73045 17 6.2633 17 7.329Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </button>
+                                <div className="flex-center h-full flex-col p-2 bg-base-100 rounded-xl text-neutral-content text-xs ">
+                                        <span className="ml-2 countdown font-mono text-xl">
+                                            <span style={{"--value": props.followUp.duration}}></span>
+                                        </span>
+                                    </div> 
+                                <button className="btn btn-circle btn-neutral text-xl " 
+                                    onClick={() => {
+                                        let val = props.followUp.duration + 1;
+                                        if(val >= 5 && val <= 20)
+                                        props.setfollowUps(prevFollowUps => [
+                                            ...prevFollowUps.slice(0, props.index),
+                                            {
+                                                ...prevFollowUps[props.index],
+                                                duration: val
+                                            },
+                                            ...prevFollowUps.slice(props.index + 1)
+                                    ]);
+                                    }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path xmlns="http://www.w3.org/2000/svg" d="M17 5V19M7 7.329V16.671C7 17.7367 7 18.2695 7.21846 18.5432C7.40845 18.7812 7.69654 18.9197 8.00108 18.9194C8.35125 18.919 8.76734 18.5861 9.59951 17.9204L13.8765 14.4988C14.9442 13.6446 15.4781 13.2176 15.6713 12.7016C15.8408 12.2492 15.8408 11.7508 15.6713 11.2984C15.4781 10.7824 14.9442 10.3554 13.8765 9.50122L9.59951 6.07961C8.76734 5.41387 8.35125 5.081 8.00108 5.08063C7.69654 5.0803 7.40845 5.21876 7.21846 5.45677C7 5.73045 7 6.2633 7 7.329Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                                
+                        </div>
+                    </div>
+                    <div
+                        className='flex flex-row'
+                    >
+                        <div
+                            className='p-2 w-1/2'
+                        >
+                            <label className="label">
+                                <span className="label-text">Bet Question At Duration</span>
+                            </label>
+                            <div
+                                className='flex gap-2'
+                            >
+                                <div className="grid grid-flow-col text-center auto-cols-max join">
+                                    <div className="flex-center flex-col p-2 bg-neutral rounded-xl text-neutral-content text-xs join-item">
+                                        <span className="ml-2 countdown font-mono text-xl">
+                                            <span style={{"--value": Math.floor(props.followUp.popup / 60)}}></span>
+                                        </span>
+                                    </div>
+                                    
+                                    <div className="flex-center flex-col py-2 bg-neutral text-neutral-content text-xs join-item">
+                                        <span className="countdown font-mono text-xl">
+                                            :
+                                        </span>
+                                    </div>
+                                    
+                                    <div className="flex-center flex-col p-2 bg-neutral rounded-xl text-neutral-content text-xs join-item">
+                                        <span className="countdown font-mono text-xl mr-2">
+                                            <span style={{"--value": Math.floor(props.followUp.popup) % 60}}></span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <button className="btn btn-circle btn-outline text-xl" onClick={() => handleBetPopup(-10)}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path d="M9.54004 15.92V10.5801L8.04004 12.2501" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M10.02 4.46997L12 2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M4.91 7.79999C3.8 9.27999 3.10999 11.11 3.10999 13.11C3.10999 18.02 7.09 22 12 22C16.91 22 20.89 18.02 20.89 13.11C20.89 8.19999 16.91 4.21997 12 4.21997C11.32 4.21997 10.66 4.31002 10.02 4.46002" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M14 10.5801C15.1 10.5801 16 11.4801 16 12.5801V13.9301C16 15.0301 15.1 15.9301 14 15.9301C12.9 15.9301 12 15.0301 12 13.9301V12.5801C12 11.4701 12.9 10.5801 14 10.5801Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                                <button className="btn btn-circle btn-outline text-xl" onClick={() => handleBetPopup(-1)}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path xmlns="http://www.w3.org/2000/svg" d="M7 5V19M17 7.329V16.671C17 17.7367 17 18.2695 16.7815 18.5432C16.5916 18.7812 16.3035 18.9197 15.9989 18.9194C15.6487 18.919 15.2327 18.5861 14.4005 17.9204L10.1235 14.4988C9.05578 13.6446 8.52194 13.2176 8.32866 12.7016C8.1592 12.2492 8.1592 11.7508 8.32866 11.2984C8.52194 10.7824 9.05578 10.3554 10.1235 9.50122L14.4005 6.07961C15.2327 5.41387 15.6487 5.081 15.9989 5.08063C16.3035 5.0803 16.5916 5.21876 16.7815 5.45677C17 5.73045 17 6.2633 17 7.329Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </button>
+                                <button className="btn btn-circle btn-outline text-xl" onClick={() => handleBetPopup(+1)}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path xmlns="http://www.w3.org/2000/svg" d="M17 5V19M7 7.329V16.671C7 17.7367 7 18.2695 7.21846 18.5432C7.40845 18.7812 7.69654 18.9197 8.00108 18.9194C8.35125 18.919 8.76734 18.5861 9.59951 17.9204L13.8765 14.4988C14.9442 13.6446 15.4781 13.2176 15.6713 12.7016C15.8408 12.2492 15.8408 11.7508 15.6713 11.2984C15.4781 10.7824 14.9442 10.3554 13.8765 9.50122L9.59951 6.07961C8.76734 5.41387 8.35125 5.081 8.00108 5.08063C7.69654 5.0803 7.40845 5.21876 7.21846 5.45677C7 5.73045 7 6.2633 7 7.329Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </button>
+                                <button className="btn btn-circle btn-outline text-xl" onClick={() => handleBetPopup(+10)}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path d="M13.98 4.46997L12 2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M19.0899 7.79999C20.1999 9.27999 20.8899 11.11 20.8899 13.11C20.8899 18.02 16.9099 22 11.9999 22C7.08988 22 3.10986 18.02 3.10986 13.11C3.10986 8.19999 7.08988 4.21997 11.9999 4.21997C12.6799 4.21997 13.3399 4.31002 13.9799 4.46002" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M9.54004 15.92V10.5801L8.04004 12.2501" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M14 10.5801C15.1 10.5801 16 11.4801 16 12.5801V13.9301C16 15.0301 15.1 15.9301 14 15.9301C12.9 15.9301 12 15.0301 12 13.9301V12.5801C12 11.4701 12.9 10.5801 14 10.5801Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </>}
+
+            <label className="label cursor-pointer w-1/3">
+                <span className="label-text">Include Revision</span> 
+                <input 
+                    type="checkbox" 
+                    checked={props.followUp.showRevision}
+                    className="checkbox"
+                    onChange={(e) => {
+                        props.setfollowUps(prevFollowUps => [
+                            ...prevFollowUps.slice(0, props.index),
+                            {
+                                ...prevFollowUps[props.index],
+                                showRevision: e.target.checked
+                            },
+                            ...prevFollowUps.slice(props.index + 1)
+                        ]);
+                    }}
+                />
+            </label>
+            
+            {   
+                 props.followUp.showRevision &&
+                <>
+                    <div
+                        className='flex flex-row'
+                    >
+                        <div
+                            className='p-2 w-full'
+                        >
+                            <label className="label">
+                                <span className="label-text">Revise Question At Duration</span>
+                            </label>
+                            <div
+                                className='flex gap-2'
+                            >
+                                <div className="grid grid-flow-col text-center auto-cols-max join">
+                                    <div className="flex-center flex-col p-2 bg-neutral rounded-xl text-neutral-content text-xs join-item">
+                                        <span className="ml-2 countdown font-mono text-xl">
+                                            <span style={{"--value": Math.floor(props.followUp.revisePopup / 60)}}></span>
+                                        </span>
+                                    </div>
+                                    
+                                    <div className="flex-center flex-col py-2 bg-neutral text-neutral-content text-xs join-item">
+                                        <span className="countdown font-mono text-xl">
+                                            :
+                                        </span>
+                                    </div>
+                                    
+                                    <div className="flex-center flex-col p-2 bg-neutral rounded-xl text-neutral-content text-xs join-item">
+                                        <span className="countdown font-mono text-xl mr-2">
+                                            <span style={{"--value": Math.floor(props.followUp.revisePopup) % 60}}></span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <button className="btn btn-circle btn-outline text-xl" onClick={() => handleRevisePopup(-10)}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path d="M9.54004 15.92V10.5801L8.04004 12.2501" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M10.02 4.46997L12 2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M4.91 7.79999C3.8 9.27999 3.10999 11.11 3.10999 13.11C3.10999 18.02 7.09 22 12 22C16.91 22 20.89 18.02 20.89 13.11C20.89 8.19999 16.91 4.21997 12 4.21997C11.32 4.21997 10.66 4.31002 10.02 4.46002" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M14 10.5801C15.1 10.5801 16 11.4801 16 12.5801V13.9301C16 15.0301 15.1 15.9301 14 15.9301C12.9 15.9301 12 15.0301 12 13.9301V12.5801C12 11.4701 12.9 10.5801 14 10.5801Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                                <button className="btn btn-circle btn-outline text-xl" onClick={() => handleRevisePopup(-1)}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path xmlns="http://www.w3.org/2000/svg" d="M7 5V19M17 7.329V16.671C17 17.7367 17 18.2695 16.7815 18.5432C16.5916 18.7812 16.3035 18.9197 15.9989 18.9194C15.6487 18.919 15.2327 18.5861 14.4005 17.9204L10.1235 14.4988C9.05578 13.6446 8.52194 13.2176 8.32866 12.7016C8.1592 12.2492 8.1592 11.7508 8.32866 11.2984C8.52194 10.7824 9.05578 10.3554 10.1235 9.50122L14.4005 6.07961C15.2327 5.41387 15.6487 5.081 15.9989 5.08063C16.3035 5.0803 16.5916 5.21876 16.7815 5.45677C17 5.73045 17 6.2633 17 7.329Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </button>
+                                <button className="btn btn-circle btn-outline text-xl" onClick={() => handleRevisePopup(+1)}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path xmlns="http://www.w3.org/2000/svg" d="M17 5V19M7 7.329V16.671C7 17.7367 7 18.2695 7.21846 18.5432C7.40845 18.7812 7.69654 18.9197 8.00108 18.9194C8.35125 18.919 8.76734 18.5861 9.59951 17.9204L13.8765 14.4988C14.9442 13.6446 15.4781 13.2176 15.6713 12.7016C15.8408 12.2492 15.8408 11.7508 15.6713 11.2984C15.4781 10.7824 14.9442 10.3554 13.8765 9.50122L9.59951 6.07961C8.76734 5.41387 8.35125 5.081 8.00108 5.08063C7.69654 5.0803 7.40845 5.21876 7.21846 5.45677C7 5.73045 7 6.2633 7 7.329Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </button>
+                                <button className="btn btn-circle btn-outline text-xl" onClick={() => handleRevisePopup(+10)}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path d="M13.98 4.46997L12 2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M19.0899 7.79999C20.1999 9.27999 20.8899 11.11 20.8899 13.11C20.8899 18.02 16.9099 22 11.9999 22C7.08988 22 3.10986 18.02 3.10986 13.11C3.10986 8.19999 7.08988 4.21997 11.9999 4.21997C12.6799 4.21997 13.3399 4.31002 13.9799 4.46002" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M9.54004 15.92V10.5801L8.04004 12.2501" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M14 10.5801C15.1 10.5801 16 11.4801 16 12.5801V13.9301C16 15.0301 15.1 15.9301 14 15.9301C12.9 15.9301 12 15.0301 12 13.9301V12.5801C12 11.4701 12.9 10.5801 14 10.5801Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            {/*
+                            <div className="text-center auto-cols-max join w-1/3 h-14">
+                                <div className=" flex-center flex-col p-2 bg-neutral rounded-xl text-neutral-content text-xs join-item">
+                                    <span className="ml-2 font-mono text-xl h-full">
+                                        <input 
+                                            className='input w-full h-full'
+                                            value={Math.floor(props.followUp.revisePopup / 60)}
+                                            onChange={(e) => {
+                                                console.log(e.target.value);
+                                                console.log(Math.floor(props.followUp.revisePopup / 60))
+                                                console.log(props.followUp.revisePopup)
+                                                
+                                            }}
+                                        />
+                                    </span>
+                                </div>
+                                
+                                <div className="flex-center flex-col py-2 bg-neutral text-neutral-content text-xs join-item">
+                                    <span className="font-mono text-xl">
+                                        :
+                                    </span>
+                                </div>
+                                
+                                <div className="flex-center flex-col p-2 bg-neutral rounded-xl text-neutral-content text-xs join-item">
+                                    <span className="font-mono text-xl mr-2 h-full">
+                                        <input
+                                            className='input w-full h-full'
+                                            value={Math.floor(props.followUp.revisePopup) % 60} 
+                                            onChange={(e) => {
+                                                console.log(e.target.value);
+                                                console.log(Math.floor(props.followUp.revisePopup) % 60)
+                                                console.log(props.followUp.revisePopup)
+                                            }}
+                                        />
+                                    </span>
+                                </div>
+                            </div>
+                            */}
+                        </div>
+                    </div>
+                </>}
+
         </div>
     )
 }
@@ -339,18 +836,16 @@ const ListOptions = (props) => {
                     disabled={props.cloud}
                 />
                 <input 
-                    type="checkbox" 
+                    type="radio" 
                     checked={props.option.isCorrect}
-                    className="checkbox"
+                    name='radio-1'
+                    className="radio"
                     onChange={() => {
-                        props.setOptions(prevOptions => [
-                            ...prevOptions.slice(0, props.index),
-                            {
-                                ...prevOptions[props.index],
-                                isCorrect: !prevOptions[props.index].isCorrect
-                            },
-                            ...prevOptions.slice(props.index + 1)
-                        ]);
+                        props.setCorrect(props.index);
+                        props.setOptions(prevOptions => prevOptions.map((option, index) => ({
+                            ...option,
+                            isCorrect: index === props.correct
+                        })));
                     }}
                     disabled={props.cloud}
                 />

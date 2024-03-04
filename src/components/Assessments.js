@@ -35,7 +35,6 @@ const Assessments = ({ admin }) => {
         });
         const data = await res.json();
         setVideos(data);
-        console.log(videos);
     }
     
     useEffect(() => {
