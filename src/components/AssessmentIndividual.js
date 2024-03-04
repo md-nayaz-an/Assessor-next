@@ -39,8 +39,6 @@ const AssessmentIndividual = (props) => {
 	const [questions, setQuestions] = useState([]);
 
 
-	const [prevResponses, setPrevResponses] = useState([]);
-
 	const fetchVideoDetails = async () => {
 		const res = await fetch('/api/videos/' + props.videoId, {
             cache: 'no-store'
@@ -49,16 +47,8 @@ const AssessmentIndividual = (props) => {
 		setVideoDetails(data);
 		//console.log(data);
 	}
-	
-	const fetchPrevResponses = async () => {
-		const res = await fetch('/api/responses/' + props.videoId, {
-            cache: 'no-store'
-        });
-		const data = await res.json();
-		setPrevResponses(data);
-		//console.log(data);
-	}
-	
+
+
 	const fetchQuestions = async () => {
 		const res = await fetch('/api/questions/' + props.videoId, {
             cache: 'no-store'
@@ -66,16 +56,14 @@ const AssessmentIndividual = (props) => {
 		const data = await res.json();
 		setRawQuestions(data);
 		//console.log(data);
-		
 		let questionProcessed = await questionListTransform(data);
 		setQuestions(questionProcessed);
 	}
-	
+
 	useEffect(() => {
 		if(props.videoId) {
 			fetchVideoDetails();
 			fetchQuestions();
-			fetchPrevResponses();
 		}
 	}, [props.videoId])
 
@@ -221,14 +209,14 @@ const AssessmentIndividual = (props) => {
 							<></>
 					}
 				</div>
-				
+
 				{
 					start ?
 					<div className='lg:p-4 w-full lg:w-1/2 flex-center flex-col gap-2'>
 						<Steps 
 							responses={props.responses}
 							current={current}
-							prevResponses={mergeQuestionResponse(rawQuestions, prevResponses)}
+							videoId={props.videoId}
 						/>
 
 						<div className='w-full rounded-lg'>

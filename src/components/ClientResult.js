@@ -9,13 +9,23 @@ import { VictoryLabel, VictoryPie } from 'victory';
 const ClientResult = (props) => {
 
 	const [questions, setQuestions] = useState([]);
-	const [responses, setResponses] = useState([]);
 	const [videoDetails, setVideoDetails] = useState({
 		title: "",
 		description: "",
 		url: "",
 	});
-	
+	const [result, setResult] = useState([]);
+	const [curr, setCurr] = useState({});
+
+	const fetchProcessedResponses = async () => {
+		const res = await fetch('/api/analytics/' + props.videoId, {
+            cache: 'no-store'
+        });
+		const data = await res.json();
+		setResult(data);
+		//console.log(data);
+	}
+
 	const fetchVideoDetails = async () => {
 		const res = await fetch('/api/videos/' + props.videoId, {
             cache: 'no-store'
@@ -24,42 +34,34 @@ const ClientResult = (props) => {
 		setVideoDetails(data);
 		//console.log(data);
 	}
-	
-	const fetchResponses = async () => {
-		const res = await fetch('/api/responses/' + props.videoId, {
+
+	const fetchResponse = async () => {
+		const res = await fetch('/api/responses/get/' + props.responseId, {
 			cache: 'no-store'
 		});
 		const data = await res.json();
-		setResponses(data);
+		setCurr(data);
 		//console.log(data);
 	}
-	
+
 	const fetchQuestions = async () => {
 		const res = await fetch('/api/questions/' + props.videoId, {
 			cache: 'no-store'
 		});
 		const data = await res.json();
 		setQuestions(data);
-		console.log(data);
+		//console.log(data);
 	}
-	
+
 	useEffect(() => {
 		if(props.videoId) {
 			fetchVideoDetails();
 			fetchQuestions();
-			fetchResponses();
+			fetchResponse();
+			fetchProcessedResponses();
 		}
 	}, [props.videoId])
-	
-	const [result, setResult] = useState([]);
-	const [curr, setCurr] = useState({});
-	useEffect(() => {
-		setResult(mergeQuestionResponse(questions, responses));
 
-		setCurr(responses.find(res => res._id === props.responseId));
-		console.log(result);
-		console.log(curr)
-	}, [responses])
 
 	useEffect(() => {
 		const containers = document.querySelectorAll('.VictoryContainer');
@@ -67,7 +69,6 @@ const ClientResult = (props) => {
 		containers.forEach(container => {
 			const svg = container.querySelector('svg');
 			if (svg) {
-				console.log("mod");
 				svg.style.overflow = 'visible';
 			}
 	    });
@@ -100,7 +101,7 @@ const ClientResult = (props) => {
 										res.options?.map((op, i) => (
 											<div 
 												className={`flex justify-between rounded-md p-1 outline 
-													${(questions[idx].options[i].isCorrect) ?
+													${(questions[idx]?.options[i]?.isCorrect) ?
 														"outline-2 outline-accent" : 
 														"outline-1 outline-slate-500"}
 												`}
@@ -108,7 +109,7 @@ const ClientResult = (props) => {
 											>
 												{op.option}
 												{
-													(curr.response[idx]?.options[0] === i) &&
+													(curr?.response[idx]?.options[0] === i) &&
 													<span className='text-xs self-end'>
 														<i>
 															your choice
@@ -122,8 +123,8 @@ const ClientResult = (props) => {
 									<div
 										className='mt-8'
 									>
-										{ `Your selection, "${result[idx].options[curr.response[idx]?.options[0]]?.option}" was chosen by 
-											${(( result[idx].options[curr.response[idx]?.options[0]]?.count / result[idx].options.reduce((acc, d) => acc + d.count, 0)) * 100).toFixed(2)}%` 
+										{ `Your selection, "${result[idx]?.options[curr.response[idx]?.options[0]]?.option}" was chosen by 
+											${(( result[idx]?.options[curr.response[idx]?.options[0]]?.count / result[idx].options.reduce((acc, d) => acc + d.count, 0)) * 100).toFixed(2)}%` 
 										}
 									</div>
 								</div>
@@ -136,8 +137,8 @@ const ClientResult = (props) => {
 											return {
 												x: r.option,
 												y: r.count,
-												color: (questions[idx].options[i].isCorrect) ? '#00CDB8' :
-														(curr.response[idx]?.options[0] === i) ? '#A6ADBB' : ""
+												color: (questions[idx]?.options[i]?.isCorrect) ? '#00CDB8' :
+														(curr?.response[idx]?.options[0] === i) ? '#A6ADBB' : ""
 											}
 										}))
 									}
@@ -146,15 +147,15 @@ const ClientResult = (props) => {
 											return {
 												x: r.option,
 												y: r.count,
-												color: (questions[idx].options[i].isCorrect) ? '#00CDB8' :
-														(curr.response[idx]?.options[0] === i) ? '#A6ADBB' : ""
+												color: (questions[idx]?.options[i]?.isCorrect) ? '#00CDB8' :
+														(curr?.response[idx]?.options[0] === i) ? '#A6ADBB' : ""
 											}
 										})}
 
 										labelComponent={<CustomLabel />}
 										colorScale={res.options.map((r, i) => {
-											return (questions[idx].options[i].isCorrect) ? '#00CDB8' :
-														(curr.response[idx]?.options[0] === i) ? '#A6ADBB' : ""
+											return (questions[idx]?.options[i]?.isCorrect) ? '#00CDB8' :
+														(curr?.response[idx]?.options[0] === i) ? '#A6ADBB' : ""
 										})}
 
 										innerRadius={({ datum }) => (datum.color === "#A6ADBB") ? 60 : 50}

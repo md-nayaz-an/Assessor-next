@@ -3,7 +3,6 @@ import Responses from "@models/responses";
 import User from "@models/user";
 import Videos from "@models/videos";
 import { connectToDB } from "@utils/database";
-import mergeQuestionResponse from "@utils/mergeQuestionResponse";
 import mongoose from "mongoose";
 
 export const GET = async (request, context) => {
